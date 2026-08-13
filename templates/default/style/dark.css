@@ -909,8 +909,41 @@ table tfoot tr td,
     color: var(--text-light);
 }
 
+.btn-primary {
+    background-color: #1677ff !important;
+    border-color: #1677ff !important;
+    color: #ffffff !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+    background-color: #2f86ff !important;
+    border-color: #2f86ff !important;
+    color: #ffffff !important;
+}
+
+.btn-primary i,
+.btn-primary .text-white {
+    color: #ffffff !important;
+}
+
 .btn-secondary {
-    background-color: #6c757d;
+    background-color: #3f4a55 !important;
+    border-color: #5d6975 !important;
+    color: #f8f9fa !important;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: #53606c !important;
+    border-color: #76828e !important;
+    color: #ffffff !important;
+}
+
+.btn-secondary i,
+.btn-secondary .text-white,
+.btn-secondary .text-secondary {
+    color: #f8f9fa !important;
 }
 
 .btn-primary:hover, .btn-secondary:hover {
@@ -945,12 +978,14 @@ table tfoot tr td,
 }
 
 .btn-outline-secondary {
-    border-color: #6c757d !important;
-    color: #6c757d !important;
+    border-color: #8792a0 !important;
+    color: #d4d9df !important;
+    background-color: transparent !important;
 }
 
 .btn-outline-secondary:hover {
-    background-color: #6c757d !important;
+    background-color: #3f4a55 !important;
+    border-color: #a7b0bb !important;
     color: #ffffff !important;
 }
 
@@ -978,6 +1013,27 @@ table tfoot tr td,
     background-color: #dc3545 !important;
     border-color: #dc3545 !important;
     color: #ffffff !important;
+}
+
+.btn:disabled,
+.btn.disabled,
+fieldset:disabled .btn {
+    border-color: #495057 !important;
+    background-color: #252a2f !important;
+    color: #7f8994 !important;
+    opacity: 1;
+    transform: none !important;
+}
+
+.btn:disabled i,
+.btn.disabled i,
+.btn:disabled .text-white,
+.btn.disabled .text-white,
+.btn:disabled .text-secondary,
+.btn.disabled .text-secondary,
+.btn:disabled .text-primary,
+.btn.disabled .text-primary {
+    color: #7f8994 !important;
 }
 
 .btn-danger:hover {

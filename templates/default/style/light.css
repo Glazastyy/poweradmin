@@ -708,12 +708,54 @@ footer a, footer a:hover, footer a:focus {
 }
 
 .btn-secondary {
-    background-color: #6c757d;
+    background-color: #5f6b76 !important;
+    border-color: #5f6b76 !important;
+    color: #ffffff !important;
 }
 
 .btn-primary:hover, .btn-secondary:hover {
     transform: translateY(-1px);
     box-shadow: none;
+}
+
+.btn-secondary:hover,
+.btn-secondary:focus {
+    background-color: #4e5963 !important;
+    border-color: #4e5963 !important;
+    color: #ffffff !important;
+}
+
+.btn-outline-secondary {
+    border-color: #66717c !important;
+    color: #4e5963 !important;
+}
+
+.btn-outline-secondary:hover,
+.btn-outline-secondary:focus {
+    background-color: #5f6b76 !important;
+    border-color: #5f6b76 !important;
+    color: #ffffff !important;
+}
+
+.btn:disabled,
+.btn.disabled,
+fieldset:disabled .btn {
+    border-color: #c9d0d7 !important;
+    background-color: #eef1f4 !important;
+    color: #8a94a0 !important;
+    opacity: 1;
+    transform: none !important;
+}
+
+.btn:disabled i,
+.btn.disabled i,
+.btn:disabled .text-white,
+.btn.disabled .text-white,
+.btn:disabled .text-secondary,
+.btn.disabled .text-secondary,
+.btn:disabled .text-primary,
+.btn.disabled .text-primary {
+    color: #8a94a0 !important;
 }
 
 /* Form validation styles */
