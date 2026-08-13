@@ -192,6 +192,12 @@ body {
         align-items: stretch !important;
         flex-direction: column;
         gap: 0.5rem;
+        padding: 0 !important;
+        border: 0 !important;
+    }
+
+    #record-filter-form > .d-flex > div:first-child {
+        display: none;
     }
 
     #record-filter-form > .d-flex > div {
@@ -208,7 +214,7 @@ body {
 
     #record-filter-form .ms-auto {
         display: grid;
-        grid-template-columns: 1fr;
+        grid-template-columns: 1fr 1fr;
         gap: 0.35rem;
         margin-left: 0 !important;
     }
@@ -241,6 +247,409 @@ body {
     .card-item small {
         font-size: 0.75rem;
         white-space: normal;
+    }
+
+    .breadcrumb {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.15rem;
+        padding: 0.65rem 0.75rem;
+        line-height: 1.35;
+    }
+
+    .desktop-breadcrumb {
+        display: none;
+    }
+
+    .breadcrumb-item {
+        max-width: 100%;
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-dns-overview {
+        display: block;
+        margin: 1.35rem 0 1rem;
+    }
+
+    .mobile-dns-overview h1 {
+        margin: 0;
+        color: #111827;
+        font-size: 1.75rem;
+        font-weight: 700;
+        line-height: 1.08;
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-dns-overview p {
+        margin: 0.7rem 0 0;
+        color: var(--text-muted);
+        font-size: 0.95rem;
+        line-height: 1.45;
+    }
+
+    .mobile-dns-overview-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.45rem;
+        margin-top: 0.8rem;
+    }
+
+    .mobile-dns-status {
+        display: inline-flex;
+        align-items: center;
+        min-height: 1.5rem;
+        padding: 0.2rem 0.55rem;
+        border-radius: 999px;
+        background-color: #e9ecef;
+        color: #111827;
+        font-size: 0.78rem;
+        font-weight: 600;
+    }
+
+    .card-header.d-flex {
+        align-items: stretch !important;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    .card-header.d-flex > div {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.4rem;
+        width: 100%;
+    }
+
+    .card-header .btn,
+    .card-header form .btn {
+        width: 100%;
+        margin-right: 0 !important;
+        white-space: normal;
+    }
+
+    .card-body > .d-flex.justify-content-between {
+        align-items: stretch !important;
+        flex-direction: column;
+        gap: 0.6rem;
+    }
+
+    .card-body > .d-flex.justify-content-between > .d-flex {
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    .mobile-zone-list {
+        display: grid;
+        gap: 0.6rem;
+    }
+
+    .dns-records-card,
+    .dns-add-card {
+        border: 0 !important;
+        background: transparent !important;
+    }
+
+    .dns-records-card > .card-header,
+    .dns-add-card > .card-header {
+        border: 0 !important;
+        background: transparent !important;
+    }
+
+    .dns-records-card > .card-body,
+    .dns-add-card > .card-body {
+        padding: 0 !important;
+        overflow: visible;
+        background: transparent !important;
+    }
+
+    .dns-records-header {
+        padding: 0 0 0.75rem !important;
+    }
+
+    .dns-records-header strong {
+        display: none;
+    }
+
+    .dns-records-actions {
+        display: grid !important;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.45rem;
+        width: 100%;
+    }
+
+    .dns-records-actions .btn,
+    .dns-records-actions form,
+    .dns-records-actions form .btn {
+        width: 100%;
+    }
+
+    .mobile-empty-state,
+    .mobile-zone-item {
+        border: 1px solid var(--border-color);
+        border-radius: 0.45rem;
+        background-color: #ffffff;
+    }
+
+    .mobile-empty-state {
+        padding: 0.85rem;
+        color: var(--text-muted);
+    }
+
+    .mobile-zone-item {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        gap: 0.65rem;
+        padding: 0.75rem;
+    }
+
+    .mobile-zone-select {
+        padding-top: 0.15rem;
+    }
+
+    .mobile-zone-main {
+        display: grid;
+        min-width: 0;
+        gap: 0.55rem;
+    }
+
+    .mobile-zone-title {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 0.4rem;
+        font-weight: 600;
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+    }
+
+    .mobile-zone-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.35rem 0.65rem;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+    }
+
+    .mobile-zone-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(5.5rem, 1fr));
+        gap: 0.4rem;
+    }
+
+    .mobile-zone-actions .btn {
+        width: 100%;
+    }
+
+    #delete-zones-form > .mt-3 {
+        display: grid;
+        gap: 0.4rem;
+    }
+
+    #delete-zones-form > .mt-3 .btn {
+        width: 100%;
+    }
+
+    .edit-records-table,
+    .add-record-table {
+        overflow: visible;
+    }
+
+    .edit-records-table table,
+    .edit-records-table thead,
+    .edit-records-table tbody,
+    .edit-records-table tr,
+    .edit-records-table td,
+    .add-record-table table,
+    .add-record-table thead,
+    .add-record-table tbody,
+    .add-record-table tr,
+    .add-record-table td,
+    .add-record-table tfoot {
+        display: block;
+        width: 100%;
+    }
+
+    .edit-records-table thead,
+    .add-record-table thead {
+        display: none;
+    }
+
+    .edit-records-table tbody,
+    .add-record-table tbody {
+        display: grid;
+        gap: 0.75rem;
+    }
+
+    .edit-records-table tbody tr,
+    .add-record-table .record-row {
+        padding: 0.75rem;
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        background-color: #ffffff !important;
+    }
+
+    .edit-records-table tbody td,
+    .add-record-table td {
+        padding: 0.4rem 0 !important;
+        border: 0 !important;
+        background: transparent !important;
+    }
+
+    .edit-records-table tbody td::before,
+    .add-record-table td::before {
+        display: block;
+        margin-bottom: 0.25rem;
+        color: var(--text-muted);
+        content: attr(data-label);
+        font-size: 0.72rem;
+        font-weight: 600;
+    }
+
+    .edit-records-table .mobile-record-select {
+        display: grid;
+        grid-template-columns: auto minmax(0, 1fr);
+        align-items: start;
+        gap: 0.6rem;
+        padding-bottom: 0.55rem !important;
+        border-bottom: 1px solid var(--border-color) !important;
+    }
+
+    .edit-records-table .mobile-record-select::before {
+        display: none;
+    }
+
+    .edit-records-table .mobile-record-card:not(.is-expanded) > td:not(.mobile-record-select) {
+        display: none;
+    }
+
+    .mobile-record-summary {
+        display: grid;
+        min-width: 0;
+        gap: 0.45rem;
+        cursor: pointer;
+        text-align: left;
+    }
+
+    .mobile-record-summary-top,
+    .mobile-record-summary-bottom {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.5rem;
+    }
+
+    .mobile-record-summary-flags {
+        display: flex;
+        align-items: center;
+        gap: 0.45rem;
+        color: var(--text-muted);
+        font-size: 0.78rem;
+    }
+
+    .mobile-record-menu {
+        width: 2rem;
+        min-width: 2rem;
+        padding: 0.1rem 0.25rem;
+        color: #111827;
+        text-decoration: none;
+    }
+
+    .mobile-record-menu:hover,
+    .mobile-record-menu:focus {
+        color: #111827;
+    }
+
+    .mobile-record-summary-name,
+    .mobile-record-summary-content {
+        overflow-wrap: anywhere;
+        color: #111827;
+        font-weight: 600;
+        line-height: 1.3;
+    }
+
+    .mobile-record-summary-content {
+        font-weight: 500;
+    }
+
+    .mobile-record-summary-bottom {
+        margin: 0.2rem -0.75rem -0.75rem;
+        padding: 0.55rem 0.75rem;
+        border-top: 1px solid var(--border-color);
+        color: var(--text-muted);
+        font-size: 0.9rem;
+    }
+
+    .mobile-record-card.is-expanded .mobile-record-summary-bottom .bi-chevron-right {
+        transform: rotate(90deg);
+    }
+
+    .edit-records-table .mobile-record-name input {
+        font-weight: 600;
+    }
+
+    .edit-records-table .mobile-record-content,
+    .add-record-table .content-container {
+        overflow-wrap: anywhere;
+    }
+
+    .edit-records-table .badge {
+        border-radius: 999px;
+        padding: 0.35rem 0.55rem;
+    }
+
+    .edit-records-table .mobile-record-actions .d-flex {
+        justify-content: stretch !important;
+    }
+
+    .edit-records-table .mobile-record-actions .btn,
+    .add-record-table .mobile-record-actions .btn {
+        width: 100%;
+    }
+
+    .add-record-table tfoot tr {
+        display: block;
+        padding-top: 0.75rem;
+        background: transparent !important;
+    }
+
+    .add-record-table tfoot td {
+        text-align: stretch !important;
+    }
+
+    .add-record-table tfoot td::before {
+        display: none;
+    }
+
+    .add-record-table tfoot .btn {
+        width: 100%;
+    }
+
+    #edit-zone-form > .d-flex.justify-content-between,
+    .card-footer.d-flex,
+    .mt-3.mb-3 .d-flex {
+        align-items: stretch !important;
+        flex-direction: column;
+        gap: 0.65rem;
+    }
+
+    #edit-zone-form > .d-flex.justify-content-between .d-flex.gap-2,
+    .card-footer.d-flex > div,
+    .card-footer.d-flex .d-flex,
+    .mt-3.mb-3 .d-flex {
+        display: grid !important;
+        grid-template-columns: 1fr;
+        gap: 0.45rem !important;
+        width: 100%;
+    }
+
+    #edit-zone-form > .d-flex.justify-content-between .btn,
+    .card-footer .btn,
+    .mt-3.mb-3 .btn {
+        width: 100%;
+    }
+
+    #recordsTable,
+    .add-record-form {
+        min-width: 0 !important;
     }
 }
 
