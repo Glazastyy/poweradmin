@@ -192,8 +192,8 @@
 </div>
 {% endif %}
 
-<div class="card shadow-sm mb-4">
-    <div class="card-header py-3 d-flex justify-content-between align-items-center">
+<div class="card shadow-sm mb-4 dns-records-card">
+    <div class="card-header py-3 d-flex justify-content-between align-items-center dns-records-header">
         <strong>
             <i class="bi bi-pencil-square me-2"></i>
             {% if idn_zone_name %}
@@ -202,7 +202,7 @@
             {% trans %}Edit zone{% endtrans %} "{{ zone_name_to_display }}"
             {% endif %}
         </strong>
-        <div>
+        <div class="dns-records-actions">
             {% if perm_edit != "none" and iface_edit_save_changes_top %}
             <button class="btn btn-primary btn-sm" type="submit" form="edit-zone-form" name="commit">
                 <i class="bi bi-check-circle me-1 text-white"></i>{% trans %}Save changes{% endtrans %}
@@ -450,7 +450,7 @@
                             {% if r['disabled'] %}
                             <span>{% trans %}Disabled{% endtrans %}</span>
                             {% else %}
-                            <span>{% trans %}Active{% endtrans %}</span>
+                            <span><i class="bi bi-cloud-fill me-1"></i>{% trans %}DNS only{% endtrans %}</span>
                             {% endif %}
                             {% if record_actions_allowed and (iface_show_record_edit_button or iface_show_record_delete_button) %}
                             <div class="dropdown">
@@ -465,7 +465,13 @@
                                         </a>
                                     </li>
                                     {% endif %}
+                                    <li>
+                                        <button class="dropdown-item" type="button" disabled>
+                                            <i class="bi bi-pin-angle me-2"></i>{% trans %}Pin to top{% endtrans %}
+                                        </button>
+                                    </li>
                                     {% if iface_show_record_delete_button %}
+                                    <li><hr class="dropdown-divider"></li>
                                     <li>
                                         <a class="dropdown-item text-danger" href="{{ base_url_prefix }}/zones/{{ zone_id }}/records/{{ r['id'] }}/delete">
                                             <i class="bi bi-trash me-2"></i>{% trans %}Delete record{% endtrans %}
