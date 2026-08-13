@@ -1080,6 +1080,104 @@ class DatabaseStructureHelper
                 )
             ),
             array(
+                'table_name' => 'user_passkeys',
+                'options' => array('type' => 'innodb'),
+                'fields' => array(
+                    'id' => array(
+                        'notnull' => 1,
+                        'unsigned' => 0,
+                        'default' => 0,
+                        'autoincrement' => 1,
+                        'type' => 'integer',
+                        'name' => 'id',
+                        'table' => 'user_passkeys',
+                        'flags' => 'primary_keynot_null'
+                    ),
+                    'user_id' => array(
+                        'notnull' => 1,
+                        'unsigned' => 0,
+                        'type' => 'integer',
+                        'name' => 'user_id',
+                        'table' => 'user_passkeys',
+                        'flags' => 'not_null'
+                    ),
+                    'credential_id' => array(
+                        'notnull' => 1,
+                        'type' => 'text',
+                        'name' => 'credential_id',
+                        'table' => 'user_passkeys',
+                        'flags' => 'not_null'
+                    ),
+                    'public_key' => array(
+                        'notnull' => 1,
+                        'type' => 'text',
+                        'name' => 'public_key',
+                        'table' => 'user_passkeys',
+                        'flags' => 'not_null'
+                    ),
+                    'name' => array(
+                        'notnull' => 1,
+                        'length' => 255,
+                        'fixed' => 0,
+                        'type' => 'text',
+                        'name' => 'name',
+                        'table' => 'user_passkeys',
+                        'flags' => 'not_null'
+                    ),
+                    'sign_count' => array(
+                        'notnull' => 1,
+                        'unsigned' => 0,
+                        'default' => 0,
+                        'type' => 'integer',
+                        'name' => 'sign_count',
+                        'table' => 'user_passkeys',
+                        'flags' => 'not_null'
+                    ),
+                    'transports' => array(
+                        'notnull' => 0,
+                        'type' => 'text',
+                        'name' => 'transports',
+                        'table' => 'user_passkeys',
+                        'flags' => ''
+                    ),
+                    'aaguid' => array(
+                        'notnull' => 0,
+                        'length' => 64,
+                        'fixed' => 0,
+                        'type' => 'text',
+                        'name' => 'aaguid',
+                        'table' => 'user_passkeys',
+                        'flags' => ''
+                    ),
+                    'created_at' => array(
+                        'notnull' => 1,
+                        'default' => 'current_timestamp',
+                        'type' => 'timestamp',
+                        'name' => 'created_at',
+                        'table' => 'user_passkeys',
+                        'flags' => 'not_null'
+                    ),
+                    'last_used_at' => array(
+                        'notnull' => 0,
+                        'type' => 'timestamp',
+                        'name' => 'last_used_at',
+                        'table' => 'user_passkeys',
+                        'flags' => ''
+                    )
+                ),
+                'indexes' => array(
+                    'idx_user_passkeys_credential_id' => array('credential_id'),
+                    'idx_user_passkeys_user_id' => array('user_id')
+                ),
+                'foreign_keys' => array(
+                    'fk_user_passkeys_users' => array(
+                        'table' => 'users',
+                        'fields' => array('user_id' => 'id'),
+                        'ondelete' => 'CASCADE'
+                    )
+                )
+            ),
+            array(
                 'table_name' => 'user_preferences',
                 'options' => array('type' => 'innodb'),
                 'fields' => array(

@@ -27,15 +27,18 @@ use Poweradmin\Application\Service\MailService;
 use Poweradmin\BaseController;
 use Poweradmin\Domain\Model\UserMfa;
 use Poweradmin\Domain\Service\MfaService;
+use Poweradmin\Domain\Service\PasskeyService;
 use Poweradmin\Domain\Service\UserContextService;
 use Poweradmin\Infrastructure\Logger\LegacyLogger;
 use Poweradmin\Infrastructure\Repository\DbUserMfaRepository;
+use Poweradmin\Infrastructure\Repository\DbUserPasskeyRepository;
 use Poweradmin\Infrastructure\Utility\IpAddressRetriever;
 use RuntimeException;
 
 class MfaSetupController extends BaseController
 {
     private MfaService $mfaService;
+    private PasskeyService $passkeyService;
     private UserContextService $userContextService;
     private LegacyLogger $auditLogger;
     private IpAddressRetriever $ipAddressRetriever;
@@ -47,6 +50,7 @@ class MfaSetupController extends BaseController
         $userMfaRepository = new DbUserMfaRepository($this->db, $this->config);
         $mailService = new MailService($this->config);
         $this->mfaService = new MfaService($userMfaRepository, $this->config, $mailService, null, $this->createUserTimezoneService());
+        $this->passkeyService = new PasskeyService(new DbUserPasskeyRepository($this->db, $this->config), $this->config);
         $this->userContextService = new UserContextService();
         $this->auditLogger = new LegacyLogger($this->db);
         $this->ipAddressRetriever = new IpAddressRetriever($_SERVER);
@@ -390,7 +394,8 @@ class MfaSetupController extends BaseController
             'mail_service_enabled' => $mailServiceEnabled,
             'email_mfa_enabled' => $emailMfaEnabled,
             'mfa_enforced' => $mfaEnforced,
-            'setup_enforced' => $setupEnforced
+            'setup_enforced' => $setupEnforced,
+            'passkeys' => $this->passkeyService->getUserPasskeys($userId),
         ]);
     }
 

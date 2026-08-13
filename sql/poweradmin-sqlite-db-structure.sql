@@ -185,6 +185,23 @@ CREATE TABLE user_mfa (
 CREATE UNIQUE INDEX idx_user_mfa_user_id ON user_mfa(user_id);
 CREATE INDEX idx_user_mfa_enabled ON user_mfa(enabled);
 
+CREATE TABLE user_passkeys (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    credential_id TEXT NOT NULL,
+    public_key TEXT NOT NULL,
+    name TEXT NOT NULL,
+    sign_count INTEGER NOT NULL DEFAULT 0,
+    transports TEXT NULL,
+    aaguid TEXT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_used_at TIMESTAMP NULL,
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE UNIQUE INDEX idx_user_passkeys_credential_id ON user_passkeys(credential_id);
+CREATE INDEX idx_user_passkeys_user_id ON user_passkeys(user_id);
+
 CREATE TABLE user_preferences (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     user_id INTEGER NOT NULL,

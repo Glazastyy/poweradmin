@@ -310,6 +310,26 @@ CREATE TABLE "public"."user_mfa" (
 CREATE UNIQUE INDEX "idx_user_mfa_user_id" ON "public"."user_mfa" USING btree ("user_id");
 CREATE INDEX "idx_user_mfa_enabled" ON "public"."user_mfa" USING btree ("enabled");
 
+CREATE SEQUENCE user_passkeys_id_seq INCREMENT 1 MINVALUE 1 MAXVALUE 2147483647 CACHE 1;
+
+CREATE TABLE "public"."user_passkeys" (
+    "id" integer DEFAULT nextval('user_passkeys_id_seq') NOT NULL,
+    "user_id" integer NOT NULL,
+    "credential_id" text NOT NULL,
+    "public_key" text NOT NULL,
+    "name" character varying(255) NOT NULL,
+    "sign_count" bigint DEFAULT 0 NOT NULL,
+    "transports" text,
+    "aaguid" character varying(64),
+    "created_at" timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+    "last_used_at" timestamp,
+    CONSTRAINT "user_passkeys_pkey" PRIMARY KEY ("id"),
+    CONSTRAINT "fk_user_passkeys_users" FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+) WITH (oids = false);
+
+CREATE UNIQUE INDEX "idx_user_passkeys_credential_id" ON "public"."user_passkeys" USING btree ("credential_id");
+CREATE INDEX "idx_user_passkeys_user_id" ON "public"."user_passkeys" USING btree ("user_id");
+
 CREATE TABLE "user_preferences" (
     "id" serial NOT NULL,
     "user_id" integer NOT NULL,

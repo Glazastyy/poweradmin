@@ -13,6 +13,23 @@
           </div>
           {% endif %}
           
+          {% if passkey_mfa %}
+          <div class="d-grid gap-2">
+            <button type="button" id="verify-passkey" class="btn btn-sm btn-primary">
+              <i class="bi bi-fingerprint me-1"></i>{% trans %}Verify with passkey{% endtrans %}
+            </button>
+            <a href="{{ base_url_prefix }}/mfa/verify?logout=1" class="btn btn-sm btn-outline-secondary">{% trans %}Cancel{% endtrans %}</a>
+          </div>
+          <script src="{{ base_url_prefix }}/assets/passkeyMfa.js"></script>
+          <script>
+          document.addEventListener('DOMContentLoaded', function () {
+            window.poweradminPasskeyMfa && window.poweradminPasskeyMfa.verify({
+              baseUrlPrefix: '{{ base_url_prefix }}',
+              button: '#verify-passkey'
+            });
+          });
+          </script>
+          {% else %}
           <form method="post" action="{{ base_url_prefix }}/mfa/verify" class="needs-validation" novalidate>
             <input type="hidden" name="mfa_token" value="{{ mfa_token }}">
             <input type="hidden" name="username" value="{{ username }}">
@@ -39,9 +56,10 @@
             
             <div class="d-grid gap-2">
               <button type="submit" name="verify_mfa" class="btn btn-sm btn-primary">{% trans %}Verify{% endtrans %}</button>
-              <a href="{{ base_url_prefix }}/auth/mfa/verify?logout=1" class="btn btn-sm btn-outline-secondary">{% trans %}Cancel{% endtrans %}</a>
+              <a href="{{ base_url_prefix }}/mfa/verify?logout=1" class="btn btn-sm btn-outline-secondary">{% trans %}Cancel{% endtrans %}</a>
             </div>
           </form>
+          {% endif %}
           
           <script>
           // Bootstrap validation script
@@ -114,4 +132,3 @@
     </div>
   </div>
 </div>
-

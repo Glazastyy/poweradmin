@@ -337,6 +337,7 @@ class MfaVerifyController extends BaseController
             'username' => $username,
             'mfa_token' => $mfaToken,
             'mfa_type' => $mfaType,
+            'passkey_mfa' => $mfaType === 'passkey',
             'msg' => $message,
             'type' => $type,
             'recovery_code_length' => $recoveryCodeLength

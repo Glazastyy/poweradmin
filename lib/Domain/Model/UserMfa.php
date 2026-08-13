@@ -29,6 +29,7 @@ class UserMfa
 {
     public const TYPE_APP = 'app';
     public const TYPE_EMAIL = 'email';
+    public const TYPE_PASSKEY = 'passkey';
 
     public function __construct(
         private readonly int $id,
@@ -199,7 +200,7 @@ class UserMfa
 
     public function setType(string $type): void
     {
-        if (!in_array($type, [self::TYPE_APP, self::TYPE_EMAIL])) {
+        if (!in_array($type, [self::TYPE_APP, self::TYPE_EMAIL, self::TYPE_PASSKEY])) {
             throw new InvalidArgumentException("Invalid MFA type: $type");
         }
 

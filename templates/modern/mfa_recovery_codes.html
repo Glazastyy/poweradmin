@@ -20,6 +20,8 @@
             
             {% if mfa_type == 'app' %}
               <p class="small"><strong>{% trans %}Authentication method:{% endtrans %}</strong> {% trans %}Authenticator app{% endtrans %}</p>
+            {% elseif mfa_type == 'passkey' %}
+              <p class="small"><strong>{% trans %}Authentication method:{% endtrans %}</strong> {% trans %}Passkey{% endtrans %}</p>
             {% else %}
               <p class="small"><strong>{% trans %}Authentication method:{% endtrans %}</strong> {% trans %}Email verification{% endtrans %}</p>
             {% endif %}

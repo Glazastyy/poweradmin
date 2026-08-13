@@ -30,6 +30,8 @@
               
               {% if mfa_type == 'app' %}
                 <p class="mb-2 small"><strong>{% trans %}Authentication method:{% endtrans %}</strong> {% trans %}Authenticator app{% endtrans %}</p>
+              {% elseif mfa_type == 'passkey' %}
+                <p class="mb-2 small"><strong>{% trans %}Authentication method:{% endtrans %}</strong> {% trans %}Passkey{% endtrans %}</p>
               {% else %}
                 <p class="mb-2 small"><strong>{% trans %}Authentication method:{% endtrans %}</strong> {% trans %}Email verification{% endtrans %}</p>
               {% endif %}
@@ -64,9 +66,54 @@
         </div>
       </div>
       
+      {% if mfa_type == 'passkey' and passkeys %}
+      <div class="card mb-4">
+        <div class="card-header py-2">
+          <small><strong><i class="bi bi-key me-2"></i>{% trans %}Registered passkeys{% endtrans %}</strong></small>
+        </div>
+        <div class="list-group list-group-flush">
+          {% for passkey in passkeys %}
+          <div class="list-group-item d-flex align-items-center justify-content-between gap-3">
+            <div>
+              <div class="fw-semibold small">{{ passkey.name }}</div>
+              <div class="text-muted small">
+                {% trans %}Created{% endtrans %} {{ passkey.createdAt|date('Y-m-d H:i') }}
+                {% if passkey.lastUsedAt %} · {% trans %}Last used{% endtrans %} {{ passkey.lastUsedAt|date('Y-m-d H:i') }}{% endif %}
+              </div>
+            </div>
+            {% if not mfa_enforced %}
+            <button type="button" class="btn btn-sm btn-outline-danger" data-passkey-delete="{{ passkey.id }}">
+              <i class="bi bi-trash"></i> {% trans %}Remove{% endtrans %}
+            </button>
+            {% endif %}
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+      {% endif %}
+
       {% if not mfa_enabled %}
       <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-4">
+          <div class="card mb-4">
+            <div class="card-header py-2">
+              <small><strong><i class="bi bi-fingerprint me-2"></i>{% trans %}Passkey{% endtrans %}</strong></small>
+            </div>
+            <div class="card-body py-2">
+              <p class="small">{% trans %}Use a device passkey, security key, fingerprint, or face unlock when you log in.{% endtrans %}</p>
+              <ul class="small mb-3">
+                <li>{% trans %}Resistant to phishing{% endtrans %}</li>
+                <li>{% trans %}Works with security keys{% endtrans %}</li>
+                <li>{% trans %}Fast verification{% endtrans %}</li>
+              </ul>
+              <button type="button" class="btn btn-sm btn-primary" id="setup-passkey">
+                {% trans %}Set up passkey{% endtrans %}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
             <div class="card-header py-2">
               <small><strong><i class="bi bi-phone me-2"></i>{% trans %}Authenticator App{% endtrans %}</strong></small>
@@ -86,7 +133,7 @@
           </div>
         </div>
         
-        <div class="col-md-6">
+        <div class="col-md-4">
           <div class="card mb-4 shadow-sm">
             <div class="card-header py-2">
               <small><strong><i class="bi bi-envelope me-2"></i>{% trans %}Email Verification{% endtrans %}</strong></small>
@@ -125,3 +172,15 @@
     </div>
   </div>
 </div>
+
+<script src="{{ base_url_prefix }}/assets/passkeyMfa.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  window.poweradminPasskeyMfa && window.poweradminPasskeyMfa.setup({
+    baseUrlPrefix: '{{ base_url_prefix }}',
+    csrfToken: '{{ csrf_token }}',
+    registerButton: '#setup-passkey',
+    deleteSelector: '[data-passkey-delete]'
+  });
+});
+</script>

@@ -57,6 +57,31 @@ mfa_verify:
   controller: Poweradmin\Application\Controller\MfaVerifyController::run
   methods: [GET, POST]
 
+mfa_passkey_register_options:
+  path: /mfa/passkey/register/options
+  controller: Poweradmin\Application\Controller\MfaPasskeyController::run
+  methods: [GET]
+
+mfa_passkey_register:
+  path: /mfa/passkey/register
+  controller: Poweradmin\Application\Controller\MfaPasskeyController::run
+  methods: [POST]
+
+mfa_passkey_verify_options:
+  path: /mfa/passkey/verify/options
+  controller: Poweradmin\Application\Controller\MfaPasskeyController::run
+  methods: [GET]
+
+mfa_passkey_verify:
+  path: /mfa/passkey/verify
+  controller: Poweradmin\Application\Controller\MfaPasskeyController::run
+  methods: [POST]
+
+mfa_passkey_delete:
+  path: /mfa/passkey/delete
+  controller: Poweradmin\Application\Controller\MfaPasskeyController::run
+  methods: [POST]
+
 # User Agreement
 user_agreement:
   path: /user-agreement

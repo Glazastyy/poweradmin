@@ -336,13 +336,26 @@ class MfaService
     {
         $userMfa = $this->userMfaRepository->findByUserId($userId);
 
-        if (!$userMfa || !$userMfa->getSecret()) {
-            $this->logger->debug('Verification failed - User not found or no secret');
+        if (!$userMfa) {
+            $this->logger->debug('Verification failed - User not found');
             return false;
         }
 
         $mfaType = $userMfa->getType();
         $secret = $userMfa->getSecret();
+
+        // First, check if the code matches a recovery code.
+        // Passkey MFA does not use a shared secret, but recovery codes must still work.
+        if ($userMfa->validateRecoveryCode($code)) {
+            $this->logger->info('Valid recovery code used by user ID: {userId}', ['userId' => $userId]);
+            $this->userMfaRepository->save($userMfa);
+            return true;
+        }
+
+        if ($mfaType === UserMfa::TYPE_PASSKEY || !$secret) {
+            $this->logger->debug('Verification failed - passkey requires WebAuthn or no secret is available');
+            return false;
+        }
 
         // For app-based authentication, verify the secret is in the correct format
         if ($mfaType === UserMfa::TYPE_APP && !$this->isValidTotpSecret($secret)) {
@@ -351,14 +364,6 @@ class MfaService
         }
 
         $this->logger->debug('Verifying code for user ID: {userId}, type: {type}', ['userId' => $userId, 'type' => $mfaType]);
-
-        // First, check if the code matches a recovery code
-        if ($userMfa->validateRecoveryCode($code)) {
-            $this->logger->info('Valid recovery code used by user ID: {userId}', ['userId' => $userId]);
-            // Recovery code is removed from the list in validateRecoveryCode
-            $this->userMfaRepository->save($userMfa);
-            return true;
-        }
 
         // For email type, verify with direct comparison
         if ($mfaType === UserMfa::TYPE_EMAIL) {
