@@ -28,6 +28,11 @@ namespace Poweradmin\Infrastructure\Utility;
  */
 class LanguageCode
 {
+    private const LOCALE_NAMES = array(
+        'pt_BR' => 'Portuguese (Brazil)',
+        'pt_PT' => 'Portuguese (Portugal)',
+    );
+
     private const LANGUAGE_CODES = array(
         'aa' => 'Afar',
         'ab' => 'Abkhaz',
@@ -223,6 +228,10 @@ class LanguageCode
      */
     public static function getByLocale(string $locale): ?string
     {
+        if (isset(self::LOCALE_NAMES[$locale])) {
+            return self::LOCALE_NAMES[$locale];
+        }
+
         $languageCode = substr($locale, 0, 2);
         return self::LANGUAGE_CODES[$languageCode] ?? null;
     }

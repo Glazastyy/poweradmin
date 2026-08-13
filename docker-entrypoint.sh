@@ -1154,7 +1154,7 @@ return [
         'title' => '${PA_APP_TITLE:-Poweradmin}',
         'base_url' => '${PA_BASE_URL:-}',
         'language' => '${PA_DEFAULT_LANGUAGE:-en_EN}',
-        'enabled_languages' => '${PA_ENABLED_LANGUAGES:-cs_CZ,de_DE,en_EN,es_ES,fr_FR,it_IT,ja_JP,lt_LT,nb_NO,nl_NL,pl_PL,pt_PT,ru_RU,tr_TR,zh_CN}',
+        'enabled_languages' => '${PA_ENABLED_LANGUAGES:-cs_CZ,de_DE,en_EN,es_ES,fr_FR,it_IT,ja_JP,lt_LT,nb_NO,nl_NL,pl_PL,pt_BR,pt_PT,ru_RU,tr_TR,zh_CN}',
         'session_timeout' => ${PA_SESSION_TIMEOUT:-1800},
         'rows_per_page' => ${PA_ROWS_PER_PAGE:-10},
         'theme' => '${PA_THEME:-default}',

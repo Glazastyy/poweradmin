@@ -1,7 +1,7 @@
 import { test, expect } from '../../fixtures/test-fixtures.js';
 
 /**
- * Tests for full language configuration (all 20 languages enabled).
+ * Tests for full language configuration (all languages enabled).
  *
  * These tests verify the complete set of supported languages when
  * `enabled_languages` uses the default (all languages). Designed for
@@ -13,7 +13,7 @@ import { test, expect } from '../../fixtures/test-fixtures.js';
 const ORIGINAL_LOCALES = [
   'en_EN', 'de_DE', 'fr_FR', 'es_ES', 'nl_NL', 'pl_PL',
   'cs_CZ', 'it_IT', 'ja_JP', 'ru_RU', 'zh_CN', 'tr_TR',
-  'lt_LT', 'nb_NO', 'pt_PT',
+  'lt_LT', 'nb_NO', 'pt_BR', 'pt_PT',
 ];
 
 const NEW_LOCALES = ['id_ID', 'ko_KR', 'sv_SE', 'uk_UA', 'vi_VN'];
@@ -28,7 +28,7 @@ test.describe('Language Selector - Full Configuration', () => {
     await page.goto('/login');
   });
 
-  test('should have all 20 supported languages', async ({ page }) => {
+  test('should have all supported languages', async ({ page }) => {
     const items = page.locator('#langSwitcher + .dropdown-menu .dropdown-item');
     const count = await items.count();
     expect(count).toBe(ALL_LOCALES.length);

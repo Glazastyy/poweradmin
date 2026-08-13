@@ -339,7 +339,7 @@ docker run -d --name poweradmin -p 80:80 \
 |----------|-------------|---------|----------|
 | `PA_APP_TITLE` | Application title displayed in browser | `Poweradmin` | No |
 | `PA_DEFAULT_LANGUAGE` | Default interface language | `en_EN` | No |
-| `PA_ENABLED_LANGUAGES` | Comma-separated list of enabled languages | `cs_CZ,de_DE,en_EN,es_ES,fr_FR,it_IT,ja_JP,lt_LT,nb_NO,nl_NL,pl_PL,pt_PT,ru_RU,tr_TR,zh_CN` | No |
+| `PA_ENABLED_LANGUAGES` | Comma-separated list of enabled languages | `cs_CZ,de_DE,en_EN,es_ES,fr_FR,it_IT,ja_JP,lt_LT,nb_NO,nl_NL,pl_PL,pt_BR,pt_PT,ru_RU,tr_TR,zh_CN` | No |
 | `PA_SESSION_TIMEOUT` | Session timeout in seconds | `1800` | No |
 | `PA_ROWS_PER_PAGE` | Number of rows per page | `10` | No |
 | `PA_THEME` | Theme name to use | `default` | No |
