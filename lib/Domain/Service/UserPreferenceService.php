@@ -191,7 +191,7 @@ class UserPreferenceService
     {
         $this->defaultValues = [
             UserPreference::KEY_ROWS_PER_PAGE => (string)$this->config->get('interface', 'rows_per_page', 10),
-            UserPreference::KEY_DEFAULT_TTL => (string)$this->config->get('dns', 'ttl', 86400),
+            UserPreference::KEY_DEFAULT_TTL => (string)$this->config->get('dns', 'ttl', 500),
             UserPreference::KEY_SHOW_ZONE_SERIAL => $this->config->get('interface', 'display_serial_in_zone_list', false) ? 'true' : 'false',
             UserPreference::KEY_SHOW_ZONE_TEMPLATE => $this->config->get('interface', 'display_template_in_zone_list', false) ? 'true' : 'false',
             UserPreference::KEY_RECORD_FORM_POSITION => $this->config->get('interface', 'position_record_form_top', true) ? 'top' : 'bottom',

@@ -128,7 +128,7 @@ class BulkRecordAddController extends BaseController
         $zone_id = (int)$this->getSafeRequestValue('id');
         $records_text = $_POST['records'];
         $lines = explode("\n", trim($records_text));
-        $default_ttl = $this->config->get('dns', 'ttl', 3600);
+        $default_ttl = $this->config->get('dns', 'ttl', 500);
 
         $success_count = 0;
         $failed_records = [];
@@ -249,7 +249,7 @@ class BulkRecordAddController extends BaseController
             'zone_name' => $zone_name,
             'idn_zone_name' => $idn_zone_name,
             'failed_records' => $failed_records,
-            'default_ttl' => $this->config->get('dns', 'ttl', 3600),
+            'default_ttl' => $this->config->get('dns', 'ttl', 500),
             'iface_record_comments' => $this->config->get('interface', 'show_record_comments', true),
             'is_reverse_zone' => $zone_name !== null && DnsHelper::isReverseZone($zone_name),
             'display_hostname_only' => $this->createUserPreferenceService()->getDisplayHostnameOnly(

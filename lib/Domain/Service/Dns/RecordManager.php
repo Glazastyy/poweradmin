@@ -36,6 +36,7 @@ use Poweradmin\Domain\Service\DnsBackendProvider;
 use Poweradmin\Domain\Service\DnsFormatter;
 use Poweradmin\Domain\Service\DnsRecordValidationServiceInterface;
 use Poweradmin\Domain\Service\DnsValidation\HostnameValidator;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Infrastructure\Configuration\ConfigurationManager;
 use Poweradmin\Infrastructure\Service\MessageService;
 use Psr\Log\LoggerInterface;
@@ -127,7 +128,7 @@ class RecordManager implements RecordManagerInterface
         }
 
         $dns_hostmaster = $this->config->get('dns', 'hostmaster');
-        $dns_ttl = $this->config->get('dns', 'ttl');
+        $dns_ttl = $this->getDefaultTtlForRecordType($type);
 
         // Add double quotes to content if it is a TXT record and dns_txt_auto_quote is enabled
         $content = $this->dnsFormatter->formatContent($type, $content);
@@ -232,7 +233,7 @@ class RecordManager implements RecordManagerInterface
         }
 
         $dns_hostmaster = $this->config->get('dns', 'hostmaster');
-        $dns_ttl = $this->config->get('dns', 'ttl');
+        $dns_ttl = $this->getDefaultTtlForRecordType($type);
 
         // Add double quotes to content if it is a TXT record and dns_txt_auto_quote is enabled
         $content = $this->dnsFormatter->formatContent($type, $content);
@@ -346,7 +347,7 @@ class RecordManager implements RecordManagerInterface
         // Add double quotes to content if it is a TXT record and dns_txt_auto_quote is enabled
         $record['content'] = $this->dnsFormatter->formatContent($record['type'], $record['content']);
 
-        $dns_ttl = $this->config->get('dns', 'ttl');
+        $dns_ttl = $this->getDefaultTtlForRecordType($record['type']);
 
         if ($zone_type == "SLAVE" || $perm_edit == "none" || (($perm_edit == "own" || $perm_edit == "own_as_client") && $user_is_zone_owner == "0")) {
             $this->messageService->addSystemError(_("You do not have the permission to edit this record."));
@@ -528,5 +529,10 @@ class RecordManager implements RecordManagerInterface
     private function clearUiDataCache(): void
     {
         (new UiDataCacheService($this->config))->clear();
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->config))->resolveTtlForType($recordType, false);
     }
 }

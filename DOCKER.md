@@ -179,12 +179,13 @@ docker run -d --name poweradmin -p 80:80 \
 
 | Variable | Description | Default | Required |
 |----------|-------------|---------|----------|
-| `PA_DNS_TTL` | Default TTL for new records (seconds) | `86400` | No |
+| `PA_DNS_TTL` | Default TTL for new non-authority records (seconds) | `500` | No |
 | `PA_DNS_TTL_REVERSE` | Default TTL for PTR records in reverse zones (seconds); unset falls back to `PA_DNS_TTL` | Empty | No |
 | `PA_DNS_SOA_REFRESH` | SOA refresh interval (seconds) | `28800` | No |
 | `PA_DNS_SOA_RETRY` | SOA retry interval (seconds) | `7200` | No |
 | `PA_DNS_SOA_EXPIRE` | SOA expire time (seconds) | `604800` | No |
 | `PA_DNS_SOA_MINIMUM` | SOA minimum TTL (seconds) | `86400` | No |
+| `PA_DNS_SOA_RECORD_TTL` | Default TTL for SOA, NS, and DNSSEC structural records (seconds) | `86400` | No |
 | `PA_DNS_ZONE_TYPE_DEFAULT` | Default zone type: `MASTER` or `NATIVE` | `MASTER` | No |
 | `PA_DNS_DEFAULT_ZONE_TEMPLATE` | Template pre-selected on the add-zone form, by id or name | Empty | No |
 | `PA_DNS_ZONE_OWNERSHIP_MODE` | Zone ownership model: `both`, `users_only` or `groups_only` | `both` | No |

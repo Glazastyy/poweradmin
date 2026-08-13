@@ -158,7 +158,7 @@ abstract class AbstractDnsWizard implements DnsWizardInterface
      */
     protected function getDefaultTTL(): int
     {
-        return (int) $this->config->get('dns', 'ttl', 3600);
+        return (int) $this->config->get('dns', 'ttl', 500);
     }
 
     /**

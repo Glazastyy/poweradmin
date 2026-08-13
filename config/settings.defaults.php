@@ -193,7 +193,7 @@ return [
         'ns2' => 'ns2.example.com',
         'ns3' => '',
         'ns4' => '',
-        'ttl' => 86400,                            // Default TTL for new records (86400 = 24 hours)
+        'ttl' => 500,                              // Default TTL for new non-authority records
         'ttl_reverse' => null,                     // Default TTL for PTR records in reverse zones; null falls back to dns.ttl (added in 4.4.0)
 
         // SOA Record Settings
@@ -201,6 +201,7 @@ return [
         'soa_retry' => 7200,                       // 2 hours
         'soa_expire' => 604800,                    // 1 week
         'soa_minimum' => 86400,                    // 24 hours (SOA settings added in 2.2.3)
+        'soa_rec_default_ttl' => 86400,            // Default TTL for SOA, NS, and DNSSEC structural records
 
         'zone_type_default' => 'MASTER',           // Options: 'MASTER', 'NATIVE' (added in 2.1.9)
         'default_zone_template' => null,           // Pre-selected template on the add-zone form. Template id (int) or name (string); null for "none" (added in 4.4.0)

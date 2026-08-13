@@ -963,12 +963,14 @@
         }
     }
 
-    // TTL_DEFAULTS.ptr is null when dns.ttl_reverse is unset or this is a forward
-    // zone (so forward-zone PTR records, e.g. RFC 2317, keep dns.ttl).
+    // Authority records keep their longer default; reverse-zone PTR records use
+    // dns.ttl_reverse when configured. Everything else keeps dns.ttl.
     const TTL_DEFAULTS = {
         plain: {{ default_ttl|json_encode|raw }},
+        authority: {{ authority_default_ttl|json_encode|raw }},
         ptr: {{ (is_reverse_zone ? ptr_default_ttl : null)|json_encode|raw }}
     };
+    const AUTHORITY_RECORD_TYPES = ['SOA', 'NS', 'DNSKEY', 'DS', 'CDS', 'CDNSKEY', 'NSEC', 'NSEC3', 'NSEC3PARAM', 'RRSIG'];
 
     let suppressTtlSwap = false;
 
@@ -976,8 +978,10 @@
         if (suppressTtlSwap || !ttlInput || ttlInput.dataset.userEdited === 'true') {
             return;
         }
-        const isPtr = typeSelect.value === 'PTR';
-        const target = isPtr && TTL_DEFAULTS.ptr !== null ? TTL_DEFAULTS.ptr : TTL_DEFAULTS.plain;
+        const type = typeSelect.value;
+        const target = AUTHORITY_RECORD_TYPES.includes(type)
+            ? TTL_DEFAULTS.authority
+            : (type === 'PTR' && TTL_DEFAULTS.ptr !== null ? TTL_DEFAULTS.ptr : TTL_DEFAULTS.plain);
         ttlInput.value = target;
     }
 </script>

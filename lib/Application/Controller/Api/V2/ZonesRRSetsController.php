@@ -41,6 +41,7 @@ use Poweradmin\Domain\Service\Dns\RecordManagerInterface;
 use Poweradmin\Domain\Service\Dns\SOARecordManager;
 use Poweradmin\Domain\Service\DnsValidation\HostnameValidator;
 use Poweradmin\Domain\Service\DnsFormatter;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Utility\DnsHelper;
 use Poweradmin\Domain\Repository\ZoneRepositoryInterface;
 use Poweradmin\Domain\Repository\RecordRepositoryInterface;
@@ -437,7 +438,7 @@ class ZonesRRSetsController extends PublicApiController
 
             $nameRaw = $this->inputString($input, 'name', '');
             $typeRaw = $this->inputString($input, 'type', '');
-            $ttl = $this->inputInt($input, 'ttl', 3600);
+            $ttl = $this->inputInt($input, 'ttl', $this->getDefaultTtlForRecordType($type));
             if ($nameRaw === null || $typeRaw === null || $ttl === null) {
                 return $this->returnApiError('Invalid field types in request body', 400);
             }
@@ -476,7 +477,7 @@ class ZonesRRSetsController extends PublicApiController
                 $dnsFormatter = new DnsFormatter($this->getConfig());
                 $normalizedName = $hostnameValidator->normalizeRecordName($fqdn, $zoneName);
                 $dns_hostmaster = $this->getConfig()->get('dns', 'hostmaster');
-                $dns_ttl = $this->getConfig()->get('dns', 'ttl');
+                $dns_ttl = $this->getDefaultTtlForRecordType($type);
 
                 $validatedRecords = [];
                 foreach ($input['records'] as $recordData) {
@@ -870,5 +871,10 @@ class ZonesRRSetsController extends PublicApiController
         }
 
         return $content;
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->getConfig()))->resolveTtlForType($recordType, false);
     }
 }

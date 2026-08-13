@@ -41,6 +41,7 @@ use Poweradmin\Domain\Service\Dns\SOARecordManager;
 use Poweradmin\Domain\Service\DnsValidation\HostnameValidator;
 use Poweradmin\Domain\Service\DnsFormatter;
 use Poweradmin\Domain\Service\DnsRecord;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Service\ReverseRecordCreator;
 use Poweradmin\Domain\Utility\DnsHelper;
 use Poweradmin\Domain\Utility\RecordIdHelper;
@@ -452,7 +453,7 @@ class ZonesRecordsController extends PublicApiController
             $type = strtoupper(trim($this->inputString($input, 'type', '')));
             $originalContent = trim($this->inputString($input, 'content', ''));
             $content = $originalContent;
-            $ttl = $this->inputInt($input, 'ttl', 3600);
+            $ttl = $this->inputInt($input, 'ttl', $this->getDefaultTtlForRecordType($type));
             $priority = $this->inputInt($input, 'priority', 0);
             $disabled = $this->inputIntFromBool($input, 'disabled', 0);
             $createPtr = $this->inputBool($input, 'create_ptr', false);
@@ -504,7 +505,7 @@ class ZonesRecordsController extends PublicApiController
 
             // Validate the record
             $dns_hostmaster = $this->getConfig()->get('dns', 'hostmaster');
-            $dns_ttl = $this->getConfig()->get('dns', 'ttl');
+            $dns_ttl = $this->getDefaultTtlForRecordType($type);
 
             $validationResult = $validationService->validateRecord(
                 -1,
@@ -1042,5 +1043,10 @@ class ZonesRecordsController extends PublicApiController
         }
 
         return $content;
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->getConfig()))->resolveTtlForType($recordType, false);
     }
 }

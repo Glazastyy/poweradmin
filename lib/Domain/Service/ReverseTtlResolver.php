@@ -31,6 +31,19 @@ use Poweradmin\Infrastructure\Configuration\ConfigurationManager;
  */
 class ReverseTtlResolver
 {
+    private const AUTHORITY_RECORD_TYPES = [
+        RecordType::SOA,
+        RecordType::NS,
+        'DNSKEY',
+        'DS',
+        'CDS',
+        'CDNSKEY',
+        'NSEC',
+        'NSEC3',
+        'NSEC3PARAM',
+        'RRSIG',
+    ];
+
     public function __construct(private ConfigurationManager $config)
     {
     }
@@ -49,12 +62,19 @@ class ReverseTtlResolver
     }
 
     /**
-     * Plain dns.ttl with the 86400 fallback used by the historical batch-PTR
-     * flow when settings.defaults.php is bypassed.
+     * Plain dns.ttl with the 500 fallback used when settings.defaults.php is bypassed.
      */
     public function getForwardTtl(): int
     {
-        return (int)$this->config->get('dns', 'ttl', 86400);
+        return (int)$this->config->get('dns', 'ttl', 500);
+    }
+
+    /**
+     * TTL for SOA, NS, and DNSSEC structural records.
+     */
+    public function getAuthorityTtl(): int
+    {
+        return (int)$this->config->get('dns', 'soa_rec_default_ttl', 86400);
     }
 
     /**
@@ -68,17 +88,29 @@ class ReverseTtlResolver
     }
 
     /**
-     * TTL for a record about to be persisted. PTR records in reverse zones prefer
+     * TTL for a record about to be persisted. Authority records keep their
+     * longer SOA/NS default, and PTR records in reverse zones prefer
      * dns.ttl_reverse (falling back to dns.ttl); every other case uses dns.ttl.
      * The zone-type gate is required so PTRs that legitimately live in forward
      * zones (RFC 2317 setups, custom dns.domain_record_types) keep dns.ttl.
      */
     public function resolveTtlForType(string $recordType, bool $isInReverseZone): int
     {
-        if ($isInReverseZone && strtoupper($recordType) === RecordType::PTR) {
+        $recordType = strtoupper($recordType);
+
+        if (in_array($recordType, self::AUTHORITY_RECORD_TYPES, true)) {
+            return $this->getAuthorityTtl();
+        }
+
+        if ($isInReverseZone && $recordType === RecordType::PTR) {
             return $this->getConfiguredReverseTtl() ?? $this->getForwardTtl();
         }
         return $this->getForwardTtl();
+    }
+
+    public static function isAuthorityRecordType(string $recordType): bool
+    {
+        return in_array(strtoupper($recordType), self::AUTHORITY_RECORD_TYPES, true);
     }
 
     /**

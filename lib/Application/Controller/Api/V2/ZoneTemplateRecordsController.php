@@ -34,6 +34,7 @@ namespace Poweradmin\Application\Controller\Api\V2;
 use Poweradmin\Application\Controller\Api\PublicApiController;
 use Poweradmin\Domain\Service\ApiPermissionService;
 use Poweradmin\Domain\Service\DnsValidation\DnsValidatorRegistry;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Service\ZoneTemplateRecordValidationService;
 use Poweradmin\Infrastructure\Repository\DbZoneTemplateRepository;
 use Symfony\Component\HttpFoundation\JsonResponse;
@@ -70,7 +71,7 @@ class ZoneTemplateRecordsController extends PublicApiController
             $content,
             $ttl,
             $priority,
-            (int)$this->config->get('dns', 'ttl', 3600)
+            (int)$this->config->get('dns', 'ttl', 500)
         );
 
         return $result->isValid() ? null : $this->returnApiError($result->getFirstError(), 400);
@@ -287,7 +288,7 @@ class ZoneTemplateRecordsController extends PublicApiController
             $name = trim($data['name']);
             $type = trim($data['type']);
             $content = trim($data['content']);
-            $ttl = isset($data['ttl']) ? (int)$data['ttl'] : (int)$this->config->get('dns', 'ttl');
+            $ttl = isset($data['ttl']) ? (int)$data['ttl'] : $this->getDefaultTtlForRecordType($type);
             $priority = isset($data['priority']) ? (int)$data['priority'] : 0;
 
             if (!$this->apiPermissionService->canWriteTemplateRecordType($userId, $type)) {
@@ -564,5 +565,10 @@ class ZoneTemplateRecordsController extends PublicApiController
         } catch (\Throwable $e) {
             return $this->handleException($e, 'ZoneTemplateRecordsController::deleteRecord', 'Failed to delete zone template record');
         }
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->config))->resolveTtlForType($recordType, false);
     }
 }

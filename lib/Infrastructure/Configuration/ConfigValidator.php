@@ -50,6 +50,7 @@ class ConfigValidator
         $this->validatePdnsApiKey();
         $this->validatePdnsApiTimeout();
         $this->validateDnsBackend();
+        $this->validateDnsTtls();
         $this->validatePdnsDbName();
         $this->validatePermissions();
 
@@ -210,6 +211,21 @@ class ConfigValidator
 
         if ((!is_string($apiKey) || $apiKey === '') && !isset($this->errors['pdns_api.key'])) {
             $this->errors['pdns_api.key'] = 'PowerDNS API key is required when dns.backend is "api"';
+        }
+    }
+
+    private function validateDnsTtls(): void
+    {
+        foreach (['ttl', 'soa_rec_default_ttl'] as $key) {
+            $ttl = $this->getSetting('dns', $key);
+            if ($ttl !== null && (!is_int($ttl) || $ttl < 0)) {
+                $this->errors["dns.$key"] = "$key must be a non-negative integer";
+            }
+        }
+
+        $reverseTtl = $this->getSetting('dns', 'ttl_reverse');
+        if ($reverseTtl !== null && $reverseTtl !== '' && (!is_int($reverseTtl) || $reverseTtl < 0)) {
+            $this->errors['dns.ttl_reverse'] = 'ttl_reverse must be null, empty, or a non-negative integer';
         }
     }
 

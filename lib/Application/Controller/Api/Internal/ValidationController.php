@@ -117,7 +117,7 @@ class ValidationController extends InternalApiController
         $name = $jsonData['name'] ?? ($jsonData['records'][0]['name'] ?? '');
         $type = $jsonData['type'] ?? ($jsonData['records'][0]['type'] ?? '');
         $content = $jsonData['content'] ?? ($jsonData['records'][0]['content'] ?? '');
-        $ttl = $jsonData['ttl'] ?? ($jsonData['records'][0]['ttl'] ?? $this->getConfig()->get('dns', 'ttl', 3600));
+        $ttl = $jsonData['ttl'] ?? ($jsonData['records'][0]['ttl'] ?? $this->getConfig()->get('dns', 'ttl', 500));
         $prio = $jsonData['prio'] ?? ($jsonData['records'][0]['prio'] ?? 0);
 
         // Validation runs SQL conflict probes against the target zone (e.g. "already
@@ -141,7 +141,7 @@ class ValidationController extends InternalApiController
             $prio,
             $ttl,
             $this->getConfig()->get('dns', 'hostmaster', 'hostmaster.example.com'),
-            $this->getConfig()->get('dns', 'ttl', 3600)
+            $this->getConfig()->get('dns', 'ttl', 500)
         );
 
         if ($result->isValid()) {

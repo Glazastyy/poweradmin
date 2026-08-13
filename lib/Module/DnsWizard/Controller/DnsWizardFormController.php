@@ -239,7 +239,7 @@ class DnsWizardFormController extends BaseController
         $name = DnsHelper::restoreZoneSuffix($recordData['name'] ?? '', $zone_name);
         $type = $recordData['type'] ?? '';
         $content = $recordData['content'] ?? '';
-        $ttl = isset($recordData['ttl']) && $recordData['ttl'] !== '' ? (int)$recordData['ttl'] : $this->getConfig()->get('dns', 'ttl', 3600);
+        $ttl = isset($recordData['ttl']) && $recordData['ttl'] !== '' ? (int)$recordData['ttl'] : $this->getConfig()->get('dns', 'ttl', 500);
         $prio = isset($recordData['prio']) && $recordData['prio'] !== '' ? (int)$recordData['prio'] : 0;
 
         // Create the record

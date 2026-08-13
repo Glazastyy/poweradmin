@@ -338,7 +338,7 @@ class DnsWizardApiController extends InternalApiController
         $name = $data['name'];
         $type = $data['type'];
         $content = $data['content'];
-        $ttl = isset($data['ttl']) && $data['ttl'] !== '' ? (int)$data['ttl'] : $this->config->get('dns', 'ttl', 3600);
+        $ttl = isset($data['ttl']) && $data['ttl'] !== '' ? (int)$data['ttl'] : $this->config->get('dns', 'ttl', 500);
         $prio = isset($data['priority']) && $data['priority'] !== '' ? (int)$data['priority'] : 0;
         $comment = $data['comment'] ?? '';
 

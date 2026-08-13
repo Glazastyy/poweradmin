@@ -278,9 +278,8 @@ class AddRecordController extends BaseController
         $zone_name = $this->dnsRecord->getDomainNameById($zone_id);
         $isReverseZone = DnsHelper::isReverseZone($zone_name);
 
-        // Pre-fill with the plain dns.ttl; JS updateTtlForType() swaps in dns.ttl_reverse
-        // when the user selects PTR on a reverse zone, keeping the form consistent with
-        // what the backend will actually persist.
+        // Pre-fill with the plain dns.ttl; JS updateTtlForType() swaps in
+        // authority/PTR defaults when the selected record type needs one.
         $ttl = $this->reverseTtlResolver->getForwardTtl();
         $isDnsSecEnabled = $this->config->get('dnssec', 'enabled', false);
 
@@ -322,6 +321,7 @@ class AddRecordController extends BaseController
             'content' => $formData['content'] ?? $_POST['content'] ?? '',
             'ttl' => $formData['ttl'] ?? $_POST['ttl'] ?? $ttl,
             'default_ttl' => $this->reverseTtlResolver->getForwardTtl(),
+            'authority_default_ttl' => $this->reverseTtlResolver->getAuthorityTtl(),
             'ptr_default_ttl' => $this->reverseTtlResolver->getConfiguredReverseTtl(),
             'prio' => $formData['prio'] ?? $_POST['prio'] ?? 0,
             'zone_id' => $zone_id,

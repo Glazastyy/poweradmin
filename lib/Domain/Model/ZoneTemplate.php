@@ -28,6 +28,7 @@ use Poweradmin\Domain\Service\DnsFormatter;
 use Poweradmin\Domain\Service\DnsValidation\DnsCommonValidator;
 use Poweradmin\Domain\Service\DomainParsingService;
 use Poweradmin\Domain\Service\DnsValidation\DnsValidatorRegistry;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Service\Validation\ValidationResult;
 use Poweradmin\Domain\Service\ZoneTemplateRecordValidationService;
 use Poweradmin\Infrastructure\Configuration\ConfigurationInterface;
@@ -93,7 +94,7 @@ class ZoneTemplate
             $content,
             $ttl,
             $prio,
-            (int)$this->config->get('dns', 'ttl', 3600)
+            (int)$this->config->get('dns', 'ttl', 500)
         );
     }
 
@@ -386,7 +387,7 @@ class ZoneTemplate
             $name = '[ZONE]';
             $type = 'SOA';
             $content = '[NS1] [HOSTMASTER] [SERIAL] 28800 7200 604800 86400';
-            $ttl = (int)$this->config->get('dns', 'ttl');
+            $ttl = (new ReverseTtlResolver($this->config))->getAuthorityTtl();
             $prio = 0;
 
             // Insert the SOA record

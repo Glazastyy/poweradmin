@@ -217,8 +217,8 @@ class EditController extends BaseController
             return;
         }
         $isReverseZone = DnsHelper::isReverseZone($zone_name);
-        // Form pre-fill stays on dns.ttl; JS updateTtlForType() swaps in dns.ttl_reverse
-        // for PTR selections so display tracks what's persisted.
+        // Form pre-fill stays on dns.ttl; JS updateTtlForType() swaps in
+        // authority/PTR defaults when the selected record type needs one.
         $defaultTtl = $this->reverseTtlResolver->getForwardTtl();
 
         // Process form submissions
@@ -314,7 +314,7 @@ class EditController extends BaseController
                 if ($current_zone_template != $new_zone_template) {
                     $this->dnsRecord->updateZoneRecords(
                         $this->config->get('database', 'type', 'mysql'),
-                        $this->config->get('dns', 'ttl', 86400),
+                        $this->config->get('dns', 'ttl', 500),
                         $zone_id,
                         $new_zone_template
                     );
@@ -492,6 +492,7 @@ class EditController extends BaseController
             'session_userid' => $this->userContextService->getLoggedInUserId(),
             'dns_ttl' => $defaultTtl,
             'default_ttl' => $this->reverseTtlResolver->getForwardTtl(),
+            'authority_default_ttl' => $this->reverseTtlResolver->getAuthorityTtl(),
             'ptr_default_ttl' => $this->reverseTtlResolver->getConfiguredReverseTtl(),
             'is_reverse_zone' => $isReverseZone,
             'record_types' => $isReverseZone

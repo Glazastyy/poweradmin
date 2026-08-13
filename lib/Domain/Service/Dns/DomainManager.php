@@ -33,6 +33,7 @@ use Poweradmin\Domain\Error\ZoneIdNotFoundException;
 use Poweradmin\Domain\Repository\DomainRepositoryInterface;
 use Poweradmin\Domain\Service\DnsBackendProvider;
 use Poweradmin\Domain\Service\DnsValidation\IPAddressValidator;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Service\ZoneAccountSyncService;
 use Poweradmin\Domain\Service\ZoneTemplateSyncService;
 use Poweradmin\Infrastructure\Configuration\ConfigurationManager;
@@ -104,7 +105,6 @@ class DomainManager implements DomainManagerInterface
         if ($zone_master_add || $zone_slave_add) {
             $dns_ns1 = $this->config->get('dns', 'ns1');
             $dns_hostmaster = $this->config->get('dns', 'hostmaster');
-            $dns_ttl = $this->config->get('dns', 'ttl');
 
             if (
                 ($domain && $zone_template) ||
@@ -198,7 +198,7 @@ class DomainManager implements DomainManagerInterface
 
                             $ns1 = $dns_ns1;
                             $hm = $dns_hostmaster;
-                            $ttl = $dns_ttl;
+                            $ttl = $this->getDefaultTtlForRecordType('SOA');
 
                             // Get SOA parameters from config
                             $soa_refresh = $this->config->get('dns', 'soa_refresh', 28800);
@@ -237,8 +237,6 @@ class DomainManager implements DomainManagerInterface
                                 $db->commit();
                             }
 
-                            $dns_ttl = $this->config->get('dns', 'ttl');
-
                             $templ_records = ZoneTemplate::getZoneTemplRecords($db, $zone_template);
                             if (!empty($templ_records)) {
                                 // Process the template records
@@ -252,7 +250,7 @@ class DomainManager implements DomainManagerInterface
                                         $prio = intval($r["prio"]);
 
                                         if (!$ttl) {
-                                            $ttl = $dns_ttl;
+                                            $ttl = $this->getDefaultTtlForRecordType($recordType);
                                         }
 
                                         try {
@@ -742,7 +740,7 @@ class DomainManager implements DomainManagerInterface
                             $prio = intval($r["prio"]);
 
                             if (!$ttl) {
-                                $ttl = $dns_ttl;
+                                $ttl = $this->getDefaultTtlForRecordType($recordType);
                             }
 
                             // Check if a record with the same name, type, and content already exists
@@ -873,6 +871,11 @@ class DomainManager implements DomainManagerInterface
     private static function isIpv4ReverseZone(string $domain): bool
     {
         return stripos($domain, 'in-addr.arpa') !== false;
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->config))->resolveTtlForType($recordType, false);
     }
 
     /** Account sync entry point for the static owner-management methods */

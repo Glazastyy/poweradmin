@@ -20,10 +20,12 @@ class MockConfiguration implements ConfigurationInterface
                 'ns3' => 'ns3.example.com',
                 'ns4' => 'ns4.example.com',
                 'hostmaster' => 'hostmaster.example.com',
+                'ttl' => 500,
                 'soa_refresh' => 28800,
                 'soa_retry' => 7200,
                 'soa_expire' => 604800,
-                'soa_minimum' => 86400
+                'soa_minimum' => 86400,
+                'soa_rec_default_ttl' => 86400
             ]
         ];
     }

@@ -25,6 +25,7 @@ namespace Poweradmin\Infrastructure\Repository;
 use Exception;
 use Poweradmin\Domain\Model\ZoneTemplate;
 use Poweradmin\Domain\Service\DnsFormatter;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Infrastructure\Configuration\ConfigurationManager;
 use Poweradmin\Infrastructure\Database\DbCompat;
 
@@ -147,7 +148,7 @@ class DbZoneTemplateRepository
             $templateId = (int)$this->db->lastInsertId();
 
             // Add default SOA record
-            $ttl = (int)$this->config->get('dns', 'ttl');
+            $ttl = (new ReverseTtlResolver($this->config))->getAuthorityTtl();
             $stmt = $this->db->prepare("INSERT INTO zone_templ_records (zone_templ_id, name, type, content, ttl, prio) VALUES (:zone_templ_id, :name, :type, :content, :ttl, :prio)");
             $stmt->execute([
                 ':zone_templ_id' => $templateId,

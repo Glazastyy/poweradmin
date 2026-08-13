@@ -35,6 +35,7 @@ use Poweradmin\BaseController;
 use Poweradmin\Domain\Model\UserManager;
 use Poweradmin\Domain\Model\ZoneTemplate;
 use Poweradmin\Domain\Service\RecordTypeService;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Service\UserContextService;
 use Poweradmin\Domain\Service\ZoneTemplateSyncService;
 use Symfony\Component\Validator\Constraints as Assert;
@@ -113,7 +114,7 @@ class AddZoneTemplRecordController extends BaseController
         $type = $_POST['type'] ?? "";
         $content = $_POST['content'] ?? "";
         $prio = $_POST['prio'] ?? 0;
-        $dns_ttl = $this->config->get('dns', 'ttl', 3600);
+        $dns_ttl = $this->getDefaultTtlForRecordType($type);
         $ttl = $_POST['ttl'] ?? $dns_ttl;
 
         $template = new ZoneTemplate($this->db, $this->getConfig(), $this->createDnsBackendProvider());
@@ -138,7 +139,7 @@ class AddZoneTemplRecordController extends BaseController
         $type = $_POST['type'] ?? "";
         $content = $_POST['content'] ?? "";
         $prio = $_POST['prio'] ?? 0;
-        $dns_ttl = $this->config->get('dns', 'ttl', 3600);
+        $dns_ttl = $this->getDefaultTtlForRecordType($type);
         $ttl = $_POST['ttl'] ?? $dns_ttl;
 
         // Get count of zones using this template
@@ -158,5 +159,10 @@ class AddZoneTemplRecordController extends BaseController
             'ttl' => htmlspecialchars($ttl),
             'zones_linked_count' => $zones_linked_count,
         ]);
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->getConfig()))->resolveTtlForType($recordType, false);
     }
 }

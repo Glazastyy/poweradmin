@@ -28,15 +28,18 @@ use Poweradmin\Infrastructure\Configuration\ConfigurationManager;
 
 class ReverseTtlResolverTest extends TestCase
 {
-    private function createResolver(mixed $reverseTtl, int $defaultTtl = 86400): ReverseTtlResolver
+    private function createResolver(mixed $reverseTtl, int $defaultTtl = 500, int $authorityTtl = 86400): ReverseTtlResolver
     {
         $config = $this->createMock(ConfigurationManager::class);
-        $config->method('get')->willReturnCallback(function (string $group, string $key, mixed $default = null) use ($reverseTtl, $defaultTtl) {
+        $config->method('get')->willReturnCallback(function (string $group, string $key, mixed $default = null) use ($reverseTtl, $defaultTtl, $authorityTtl) {
             if ($group === 'dns' && $key === 'ttl_reverse') {
                 return $reverseTtl;
             }
             if ($group === 'dns' && $key === 'ttl') {
                 return $defaultTtl;
+            }
+            if ($group === 'dns' && $key === 'soa_rec_default_ttl') {
+                return $authorityTtl;
             }
             return $default;
         });
@@ -47,13 +50,13 @@ class ReverseTtlResolverTest extends TestCase
     public function testGetDefaultTtlReturnsDnsTtlWhenReverseTtlUnsetAndReverseZone(): void
     {
         $resolver = $this->createResolver(reverseTtl: null);
-        $this->assertSame(86400, $resolver->getDefaultTtl(true));
+        $this->assertSame(500, $resolver->getDefaultTtl(true));
     }
 
     public function testGetDefaultTtlReturnsDnsTtlWhenReverseTtlUnsetAndForwardZone(): void
     {
         $resolver = $this->createResolver(reverseTtl: null);
-        $this->assertSame(86400, $resolver->getDefaultTtl(false));
+        $this->assertSame(500, $resolver->getDefaultTtl(false));
     }
 
     public function testGetDefaultTtlReturnsReverseTtlWhenSetAndReverseZone(): void
@@ -65,13 +68,13 @@ class ReverseTtlResolverTest extends TestCase
     public function testGetDefaultTtlIgnoresReverseTtlOnForwardZone(): void
     {
         $resolver = $this->createResolver(reverseTtl: 300);
-        $this->assertSame(86400, $resolver->getDefaultTtl(false));
+        $this->assertSame(500, $resolver->getDefaultTtl(false));
     }
 
     public function testGetDefaultTtlFallsBackOnEmptyStringReverseTtl(): void
     {
         $resolver = $this->createResolver(reverseTtl: '');
-        $this->assertSame(86400, $resolver->getDefaultTtl(true));
+        $this->assertSame(500, $resolver->getDefaultTtl(true));
     }
 
     public function testGetDefaultTtlRespectsExplicitZeroReverseTtl(): void
@@ -143,21 +146,21 @@ class ReverseTtlResolverTest extends TestCase
     public function testResolveTtlForTypePtrFallsBackToDnsTtlWhenReverseUnset(): void
     {
         $resolver = $this->createResolver(reverseTtl: null);
-        $this->assertSame(86400, $resolver->resolveTtlForType('PTR', true));
+        $this->assertSame(500, $resolver->resolveTtlForType('PTR', true));
     }
 
     public function testResolveTtlForTypeNonPtrIgnoresReverseTtl(): void
     {
         $resolver = $this->createResolver(reverseTtl: 300);
         $this->assertSame(86400, $resolver->resolveTtlForType('NS', true));
-        $this->assertSame(86400, $resolver->resolveTtlForType('CNAME', true));
-        $this->assertSame(86400, $resolver->resolveTtlForType('A', false));
+        $this->assertSame(500, $resolver->resolveTtlForType('CNAME', true));
+        $this->assertSame(500, $resolver->resolveTtlForType('A', false));
     }
 
     public function testResolveTtlForTypePtrInForwardZoneKeepsDnsTtl(): void
     {
         $resolver = $this->createResolver(reverseTtl: 300);
-        $this->assertSame(86400, $resolver->resolveTtlForType('PTR', false));
+        $this->assertSame(500, $resolver->resolveTtlForType('PTR', false));
     }
 
     public function testResolveTtlForTypeIsCaseInsensitive(): void
@@ -165,5 +168,14 @@ class ReverseTtlResolverTest extends TestCase
         $resolver = $this->createResolver(reverseTtl: 300);
         $this->assertSame(300, $resolver->resolveTtlForType('ptr', true));
         $this->assertSame(300, $resolver->resolveTtlForType('Ptr', true));
+    }
+
+    public function testAuthorityRecordTypesUseAuthorityTtl(): void
+    {
+        $resolver = $this->createResolver(reverseTtl: 300);
+
+        $this->assertSame(86400, $resolver->resolveTtlForType('SOA', false));
+        $this->assertSame(86400, $resolver->resolveTtlForType('NS', false));
+        $this->assertSame(86400, $resolver->resolveTtlForType('DNSKEY', false));
     }
 }

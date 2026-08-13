@@ -226,7 +226,7 @@ class EditZoneTemplController extends BaseController
         $syncedZoneIds = [];
         foreach ($zones as $zone) {
             // PowerDNS record updates use domain_id; sync tracking uses Poweradmin zones.id.
-            $dnsRecord->updateZoneRecords($this->config->get('database', 'type', 'mysql'), $this->config->get('dns', 'ttl', 86400), $zone['domain_id'], $zone_templ_id);
+            $dnsRecord->updateZoneRecords($this->config->get('database', 'type', 'mysql'), $this->config->get('dns', 'ttl', 500), $zone['domain_id'], $zone_templ_id);
             $syncedZoneIds[] = $zone['zone_id'];
         }
 

@@ -43,6 +43,7 @@ use Poweradmin\Domain\Service\Dns\RecordManager;
 use Poweradmin\Domain\Service\Dns\RecordManagerInterface;
 use Poweradmin\Domain\Service\Dns\SOARecordManager;
 use Poweradmin\Domain\Service\DnsValidation\HostnameValidator;
+use Poweradmin\Domain\Service\ReverseTtlResolver;
 use Poweradmin\Domain\Utility\RecordIdHelper;
 use Poweradmin\Domain\Service\DnsFormatter;
 use Poweradmin\Domain\Utility\DnsHelper;
@@ -343,7 +344,7 @@ class ZonesRecordsBulkController extends PublicApiController
         $name = trim($this->inputString($operation, 'name', ''));
         $type = strtoupper(trim($this->inputString($operation, 'type', '')));
         $content = trim($this->inputString($operation, 'content', ''));
-        $ttl = $this->inputInt($operation, 'ttl', 3600);
+        $ttl = $this->inputInt($operation, 'ttl', $this->getDefaultTtlForRecordType($type));
         $priority = $this->inputInt($operation, 'priority', 0);
         $disabled = $this->inputIntFromBool($operation, 'disabled', 0);
 
@@ -391,7 +392,7 @@ class ZonesRecordsBulkController extends PublicApiController
         // Validate the record (pass backendProvider so CNAME/violation checks use correct backend)
         $validationService = DnsServiceFactory::createDnsRecordValidationService($this->db, $this->getConfig(), $this->backendProvider);
         $dns_hostmaster = $this->getConfig()->get('dns', 'hostmaster');
-        $dns_ttl = $this->getConfig()->get('dns', 'ttl');
+        $dns_ttl = $this->getDefaultTtlForRecordType($type);
 
         $validationResult = $validationService->validateRecord(
             -1,
@@ -555,5 +556,10 @@ class ZonesRecordsBulkController extends PublicApiController
             $this->logger->error('Failed to insert record: {message}', ['message' => $e->getMessage()]);
             return null;
         }
+    }
+
+    private function getDefaultTtlForRecordType(string $recordType): int
+    {
+        return (new ReverseTtlResolver($this->getConfig()))->resolveTtlForType($recordType, false);
     }
 }
