@@ -40,6 +40,7 @@ class ConfigValidator
         $this->validateIfaceRowAmount();
         $this->validateIfaceLang();
         $this->validateTheme();
+        $this->validateUiCache();
         $this->validateSyslogUse();
         if ($this->getSetting('logging', 'syslog_enabled')) {
             $this->validateSyslogIdent();
@@ -141,6 +142,24 @@ class ConfigValidator
                 $this->errors['interface.enabled_languages'] = 'enabled_languages must be a non-empty string and contain a list of languages separated by commas';
                 break;
             }
+        }
+    }
+
+    private function validateUiCache(): void
+    {
+        $cacheEnabled = $this->getSetting('interface', 'cache_enabled', true);
+        if (!is_bool($cacheEnabled)) {
+            $this->errors['interface.cache_enabled'] = 'cache_enabled must be a boolean value';
+        }
+
+        $cacheTtl = $this->getSetting('interface', 'cache_ttl', 60);
+        if (!is_int($cacheTtl) || $cacheTtl < 0) {
+            $this->errors['interface.cache_ttl'] = 'cache_ttl must be a non-negative integer';
+        }
+
+        $cacheDir = $this->getSetting('interface', 'cache_dir', '/tmp/poweradmin-ui-cache');
+        if (!is_string($cacheDir) || $cacheDir === '') {
+            $this->errors['interface.cache_dir'] = 'cache_dir must be a non-empty string';
         }
     }
 

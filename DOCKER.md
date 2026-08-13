@@ -344,6 +344,9 @@ docker run -d --name poweradmin -p 80:80 \
 | `PA_THEME` | Theme name to use | `default` | No |
 | `PA_STYLE` | UI style: `light` or `dark` | `light` | No |
 | `PA_THEME_BASE_PATH` | Base path for theme templates | `templates` | No |
+| `PA_UI_CACHE_ENABLED` | Enable short-lived UI data cache for expensive list/search screens | `true` | No |
+| `PA_UI_CACHE_TTL` | UI data cache TTL in seconds (`0` disables cache) | `60` | No |
+| `PA_UI_CACHE_DIR` | UI data cache directory | `/tmp/poweradmin-ui-cache` | No |
 | `PA_FAVICON_PATH` | Custom favicon path or URL; empty uses the bundled favicon.ico | Empty | No |
 | `PA_LOGO_PATH` | Custom header logo path or URL; empty uses the bundled assets/logo.png | Empty | No |
 | `PA_BASE_URL` | Base URL for SAML auto-generation and interface configuration | Empty | No |

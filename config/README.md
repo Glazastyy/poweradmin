@@ -65,5 +65,8 @@ The configuration is organized into logical groups:
     'theme' => 'default',
     'style' => 'dark', // Options: 'light', 'dark'
     'rows_per_page' => 15,
+    'cache_enabled' => true,
+    'cache_ttl' => 60,
+    'cache_dir' => '/tmp/poweradmin-ui-cache',
 ],
 ```

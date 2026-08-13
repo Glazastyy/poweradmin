@@ -25,6 +25,7 @@ namespace Poweradmin\Domain\Service\Dns;
 use Exception;
 use PDO;
 use Poweradmin\Application\Service\DnsBackendProviderFactory;
+use Poweradmin\Application\Service\UiDataCacheService;
 use Poweradmin\Domain\Error\RecordIdNotFoundException;
 use Poweradmin\Application\Service\DnssecProviderFactory;
 use Poweradmin\Application\Service\RepositoryFactory;
@@ -185,6 +186,7 @@ class RecordManager implements RecordManagerInterface
             }
         }
 
+        $this->clearUiDataCache();
         return true;
     }
 
@@ -291,6 +293,7 @@ class RecordManager implements RecordManagerInterface
             }
         }
 
+        $this->clearUiDataCache();
         return $recordId;
     }
 
@@ -387,6 +390,7 @@ class RecordManager implements RecordManagerInterface
                     $this->messageService->addSystemError(_('Failed to update record in DNS backend.'));
                     return false;
                 }
+                $this->clearUiDataCache();
                 return true;
             } else {
                 $this->messageService->addSystemError($validationResult->getFirstError());
@@ -431,7 +435,11 @@ class RecordManager implements RecordManagerInterface
                 return false;
             }
 
-            return $this->backendProvider->deleteRecord($rid);
+            $deleted = $this->backendProvider->deleteRecord($rid);
+            if ($deleted) {
+                $this->clearUiDataCache();
+            }
+            return $deleted;
         } else {
             $this->messageService->addSystemError(_("You do not have the permission to delete this record."));
             return false;
@@ -513,6 +521,12 @@ class RecordManager implements RecordManagerInterface
             $stmt->bindValue(':comment', $comment, PDO::PARAM_STR);
             $stmt->execute();
         }
+        $this->clearUiDataCache();
         return true;
+    }
+
+    private function clearUiDataCache(): void
+    {
+        (new UiDataCacheService($this->config))->clear();
     }
 }

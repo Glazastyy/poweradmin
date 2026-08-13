@@ -47,6 +47,7 @@ class DnsDataService
     private ConfigurationInterface $config;
     private ?ZoneSyncService $zoneSyncService = null;
     private RepositoryFactory $repositoryFactory;
+    private UiDataCacheService $cache;
 
     public function __construct(
         DnsBackendProvider $backendProvider,
@@ -57,6 +58,7 @@ class DnsDataService
         $this->db = $db;
         $this->config = $config;
         $this->repositoryFactory = new RepositoryFactory($db, $config, $backendProvider);
+        $this->cache = new UiDataCacheService($config);
 
         if ($backendProvider->isApiBackend()) {
             $this->zoneSyncService = new ZoneSyncService($db, $backendProvider);
@@ -103,6 +105,33 @@ class DnsDataService
         bool $showSerial = false,
         bool $showTemplate = false
     ): array {
+        if ($this->backendProvider->isApiBackend()) {
+            return $this->cache->remember('forward-zones', func_get_args(), function () use (
+                $perm,
+                $userId,
+                $letterStart,
+                $rowStart,
+                $rowAmount,
+                $sortBy,
+                $sortDirection,
+                $showSerial,
+                $showTemplate
+            ) {
+                return $this->getZonesFromApi(
+                    $perm,
+                    $userId,
+                    $letterStart,
+                    $rowStart,
+                    $rowAmount,
+                    $sortBy,
+                    $sortDirection,
+                    $showSerial,
+                    $showTemplate,
+                    'forward'
+                );
+            });
+        }
+
         $domainRepository = $this->repositoryFactory->createDomainRepository();
         return $domainRepository->getZones(
             $perm,
@@ -150,6 +179,34 @@ class DnsDataService
         bool $showSerial = false,
         bool $showTemplate = false
     ): array {
+        if ($this->backendProvider->isApiBackend()) {
+            return $this->cache->remember('reverse-zones', func_get_args(), function () use (
+                $perm,
+                $userId,
+                $reverseType,
+                $offset,
+                $limit,
+                $sortBy,
+                $sortDirection,
+                $showSerial,
+                $showTemplate
+            ) {
+                return $this->getZonesFromApi(
+                    $perm,
+                    $userId,
+                    'all',
+                    $offset,
+                    $limit,
+                    $sortBy,
+                    $sortDirection,
+                    $showSerial,
+                    $showTemplate,
+                    'reverse',
+                    $reverseType
+                );
+            });
+        }
+
         $zoneRepository = $this->repositoryFactory->createZoneRepository();
         return $zoneRepository->getReverseZones(
             $perm,
@@ -182,6 +239,13 @@ class DnsDataService
      */
     public function countZones(string $perm, string $letterStart = 'all', string $zoneType = 'forward'): int
     {
+        if ($this->backendProvider->isApiBackend()) {
+            return $this->cache->remember('zone-count', func_get_args(), function () use ($perm, $letterStart, $zoneType) {
+                $zoneCountService = new ZoneCountService($this->db, $this->config, null, $this->backendProvider);
+                return $zoneCountService->countZones($perm, $letterStart, $zoneType);
+            });
+        }
+
         $zoneCountService = new ZoneCountService($this->db, $this->config, null, $this->backendProvider);
         return $zoneCountService->countZones($perm, $letterStart, $zoneType);
     }
@@ -198,6 +262,14 @@ class DnsDataService
      */
     public function getReverseZoneCounts(string $perm, int $userId): array
     {
+        if ($this->backendProvider->isApiBackend()) {
+            return $this->cache->remember('reverse-zone-counts', func_get_args(), function () use ($perm, $userId) {
+                $this->zoneSyncService?->syncIfStale();
+                $zoneRepository = $this->repositoryFactory->createZoneRepository();
+                return $zoneRepository->getReverseZoneCounts($perm, $userId);
+            });
+        }
+
         $this->zoneSyncService?->syncIfStale();
         $zoneRepository = $this->repositoryFactory->createZoneRepository();
         return $zoneRepository->getReverseZoneCounts($perm, $userId);
@@ -219,6 +291,14 @@ class DnsDataService
      */
     public function getDistinctStartingLetters(int $userId, bool $viewOthers): array
     {
+        if ($this->backendProvider->isApiBackend()) {
+            return $this->cache->remember('zone-starting-letters', func_get_args(), function () use ($userId, $viewOthers) {
+                $this->zoneSyncService?->syncIfStale();
+                $zoneRepository = $this->repositoryFactory->createZoneRepository();
+                return $zoneRepository->getDistinctStartingLetters($userId, $viewOthers);
+            });
+        }
+
         $this->zoneSyncService?->syncIfStale();
         $zoneRepository = $this->repositoryFactory->createZoneRepository();
         return $zoneRepository->getDistinctStartingLetters($userId, $viewOthers);
@@ -258,6 +338,32 @@ class DnsDataService
         string $typeFilter = '',
         string $contentFilter = ''
     ): array {
+        if ($this->backendProvider->isApiBackend()) {
+            return $this->cache->remember('zone-records', func_get_args(), function () use (
+                $zoneId,
+                $rowStart,
+                $rowAmount,
+                $sortBy,
+                $sortDirection,
+                $includeComments,
+                $searchTerm,
+                $typeFilter,
+                $contentFilter
+            ) {
+                return $this->getFilteredRecordsForZone(
+                    $zoneId,
+                    $rowStart,
+                    $rowAmount,
+                    $sortBy,
+                    $sortDirection,
+                    $includeComments,
+                    $searchTerm,
+                    $typeFilter,
+                    $contentFilter
+                );
+            });
+        }
+
         return $this->getFilteredRecordsForZone(
             $zoneId,
             $rowStart,
@@ -304,7 +410,11 @@ class DnsDataService
             );
         }
 
-        return $this->searchZonesApi($parameters, $permissionView, $sortBy, $sortDirection, $rowAmount, $includeComments, $page);
+        return $this->cache->remember(
+            'search-zones',
+            func_get_args(),
+            fn() => $this->searchZonesApi($parameters, $permissionView, $sortBy, $sortDirection, $rowAmount, $includeComments, $page)
+        );
     }
 
     /**
@@ -318,9 +428,10 @@ class DnsDataService
             return $zoneSearch->getTotalZones($parameters, $permissionView);
         }
 
-        // API mode: get all matching zones (unpaginated) and count
-        $allZones = $this->searchZonesApi($parameters, $permissionView, 'name', 'ASC', PHP_INT_MAX, false, 1);
-        return count($allZones);
+        return $this->cache->remember('search-zones-total', func_get_args(), function () use ($parameters, $permissionView) {
+            $allZones = $this->searchZonesApi($parameters, $permissionView, 'name', 'ASC', PHP_INT_MAX, false, 1);
+            return count($allZones);
+        });
     }
 
     /**
@@ -354,7 +465,11 @@ class DnsDataService
             );
         }
 
-        return $this->searchRecordsApi($parameters, $permissionView, $sortBy, $sortDirection, $groupRecords, $rowAmount, $includeComments, $page);
+        return $this->cache->remember(
+            'search-records',
+            func_get_args(),
+            fn() => $this->searchRecordsApi($parameters, $permissionView, $sortBy, $sortDirection, $groupRecords, $rowAmount, $includeComments, $page)
+        );
     }
 
     /**
@@ -368,8 +483,10 @@ class DnsDataService
             return $recordSearch->getTotalRecords($parameters, $permissionView, $groupRecords);
         }
 
-        $allRecords = $this->searchRecordsApi($parameters, $permissionView, 'name', 'ASC', $groupRecords, PHP_INT_MAX, false, 1);
-        return count($allRecords);
+        return $this->cache->remember('search-records-total', func_get_args(), function () use ($parameters, $permissionView, $groupRecords) {
+            $allRecords = $this->searchRecordsApi($parameters, $permissionView, 'name', 'ASC', $groupRecords, PHP_INT_MAX, false, 1);
+            return count($allRecords);
+        });
     }
 
     // ---------------------------------------------------------------
@@ -793,13 +910,13 @@ class DnsDataService
         $parameters = $this->preprocessSearchQuery($parameters);
         $query = $parameters['query'];
 
-        $results = $this->backendProvider->searchDnsData($query, 'zone', 10000);
+        $results = $this->searchDnsDataCached($query, 'zone', 10000);
         $zones = $results['zones'] ?? [];
 
         // If reverse query exists, issue second search and merge unique results
         $reverseQuery = $parameters['reverse_query'] ?? '';
         if (!empty($reverseQuery)) {
-            $reverseResults = $this->backendProvider->searchDnsData($reverseQuery, 'zone', 10000);
+            $reverseResults = $this->searchDnsDataCached($reverseQuery, 'zone', 10000);
             $reverseZones = $reverseResults['zones'] ?? [];
             if (!empty($reverseZones)) {
                 $seenNames = array_flip(array_column($zones, 'name'));
@@ -900,13 +1017,13 @@ class DnsDataService
         $parameters = $this->preprocessSearchQuery($parameters);
         $query = $parameters['query'];
 
-        $results = $this->backendProvider->searchDnsData($query, 'record', 10000);
+        $results = $this->searchDnsDataCached($query, 'record', 10000);
         $records = $results['records'] ?? [];
 
         // If reverse query exists, issue second search and merge unique results
         $reverseQuery = $parameters['reverse_query'] ?? '';
         if (!empty($reverseQuery)) {
-            $reverseResults = $this->backendProvider->searchDnsData($reverseQuery, 'record', 10000);
+            $reverseResults = $this->searchDnsDataCached($reverseQuery, 'record', 10000);
             $reverseRecords = $reverseResults['records'] ?? [];
             if (!empty($reverseRecords)) {
                 $seenKeys = [];
@@ -1048,6 +1165,15 @@ class DnsDataService
             }
         }
         return $zoneComments;
+    }
+
+    private function searchDnsDataCached(string $query, string $objectType, int $max): array
+    {
+        return $this->cache->remember(
+            'backend-search',
+            [$query, $objectType, $max],
+            fn() => $this->backendProvider->searchDnsData($query, $objectType, $max)
+        );
     }
 
     /**

@@ -24,6 +24,7 @@ namespace Poweradmin\Domain\Service\Dns;
 
 use PDO;
 use Poweradmin\Application\Service\DnsBackendProviderFactory;
+use Poweradmin\Application\Service\UiDataCacheService;
 use Poweradmin\Domain\Model\Permission;
 use Poweradmin\Domain\Model\UserManager;
 use Poweradmin\Domain\Model\ZoneTemplate;
@@ -182,6 +183,7 @@ class DomainManager implements DomainManagerInterface
                     if ($type == "SLAVE") {
                         // Master IP is already set by backendProvider->createZone()
                         $db->commit();
+                        $this->clearUiDataCache();
                         return true;
                     } else {
                         if ($zone_template == "none" && $domain_id) {
@@ -223,6 +225,7 @@ class DomainManager implements DomainManagerInterface
                             if (!$isApiBackend) {
                                 $db->commit();
                             }
+                            $this->clearUiDataCache();
                             return true;
                         } elseif ($domain_id && is_numeric($zone_template)) {
                             $isApiBackend = $this->backendProvider->isApiBackend();
@@ -287,6 +290,7 @@ class DomainManager implements DomainManagerInterface
                             if (!$isApiBackend) {
                                 $db->commit();
                             }
+                            $this->clearUiDataCache();
                             return true;
                         } else {
                             $db->rollBack();
@@ -383,6 +387,7 @@ class DomainManager implements DomainManagerInterface
                 return false;
             }
 
+            $this->clearUiDataCache();
             return true;
         } else {
             $this->messageService->addSystemError(_("You do not have the permission to delete a zone."));
@@ -400,6 +405,7 @@ class DomainManager implements DomainManagerInterface
     public function deleteDomains(array $domains): bool
     {
         $allSucceeded = true;
+        $anySucceeded = false;
 
         foreach ($domains as $id) {
             $perm_edit = Permission::getEditPermission($this->db);
@@ -448,6 +454,7 @@ class DomainManager implements DomainManagerInterface
                     $stmt->execute([':id' => $id]);
 
                     $this->db->commit();
+                    $anySucceeded = true;
                 } catch (\Exception $e) {
                     if ($this->db->inTransaction()) {
                         $this->db->rollBack();
@@ -459,6 +466,10 @@ class DomainManager implements DomainManagerInterface
                 $this->messageService->addSystemError(_("You do not have the permission to delete a zone."));
                 $allSucceeded = false;
             }
+        }
+
+        if ($anySucceeded) {
+            $this->clearUiDataCache();
         }
 
         return $allSucceeded;
@@ -509,6 +520,7 @@ class DomainManager implements DomainManagerInterface
             $this->messageService->addSystemError(_('Failed to update zone type in DNS backend.'));
             return false;
         }
+        $this->clearUiDataCache();
         return true;
     }
 
@@ -530,6 +542,7 @@ class DomainManager implements DomainManagerInterface
             return false;
         }
 
+        $this->clearUiDataCache();
         return true;
     }
 
@@ -829,6 +842,7 @@ class DomainManager implements DomainManagerInterface
             if (!$isApiBackend || $this->db->inTransaction()) {
                 $this->db->commit();
             }
+            $this->clearUiDataCache();
         } catch (\Exception $e) {
             if ($this->db->inTransaction()) {
                 $this->db->rollBack();
@@ -871,5 +885,10 @@ class DomainManager implements DomainManagerInterface
         $backendProvider = DnsBackendProviderFactory::create($db, $config);
         $accountSync = new ZoneAccountSyncService($db, $config, $backendProvider);
         $accountSync->syncZoneAccount($domainId);
+    }
+
+    private function clearUiDataCache(): void
+    {
+        (new UiDataCacheService($this->config))->clear();
     }
 }

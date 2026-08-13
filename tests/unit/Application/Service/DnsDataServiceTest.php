@@ -28,6 +28,9 @@ class DnsDataServiceTest extends TestCase
             if ($section === 'database' && $key === 'pdns_db_name') {
                 return '';
             }
+            if ($section === 'interface' && $key === 'cache_enabled') {
+                return false;
+            }
             return $default;
         });
 
@@ -45,6 +48,31 @@ class DnsDataServiceTest extends TestCase
     private function createService(): DnsDataService
     {
         return new DnsDataService($this->mockBackend, $this->mockDb, $this->mockConfig);
+    }
+
+    private function createCachedService(string $cacheDir): DnsDataService
+    {
+        $config = $this->createMock(ConfigurationInterface::class);
+        $config->method('get')->willReturnCallback(function (string $section, string $key, $default = null) use ($cacheDir) {
+            if ($section === 'database' && $key === 'type') {
+                return 'mysql';
+            }
+            if ($section === 'database' && $key === 'pdns_db_name') {
+                return '';
+            }
+            if ($section === 'interface' && $key === 'cache_enabled') {
+                return true;
+            }
+            if ($section === 'interface' && $key === 'cache_ttl') {
+                return 60;
+            }
+            if ($section === 'interface' && $key === 'cache_dir') {
+                return $cacheDir;
+            }
+            return $default;
+        });
+
+        return new DnsDataService($this->mockBackend, $this->mockDb, $config);
     }
 
     // ---------------------------------------------------------------
@@ -176,6 +204,33 @@ class DnsDataServiceTest extends TestCase
         $this->assertSame('example.com', $result[0]['name']);
         $this->assertArrayHasKey('user_id', $result[0]);
         $this->assertArrayHasKey('owner_fullnames', $result[0]);
+    }
+
+    public function testSearchZonesApiModeUsesUiDataCache(): void
+    {
+        $this->mockBackend->method('isApiBackend')->willReturn(true);
+        $this->mockBackend->expects($this->once())->method('searchDnsData')->willReturn([
+            'zones' => [
+                ['id' => 1, 'name' => 'example.com', 'type' => 'NATIVE'],
+            ],
+            'records' => [],
+        ]);
+
+        $mockStmt = $this->createMock(\PDOStatement::class);
+        $mockStmt->method('fetch')->willReturn(false);
+        $mockStmt->method('execute')->willReturn(true);
+        $this->mockDb->method('query')->willReturn($mockStmt);
+        $this->mockDb->method('prepare')->willReturn($mockStmt);
+
+        $cacheDir = sys_get_temp_dir() . '/poweradmin-ui-cache-test-' . uniqid('', true);
+        $parameters = ['query' => 'example', 'zones' => true, 'records' => false];
+        $service = $this->createCachedService($cacheDir);
+
+        $first = $service->searchZones($parameters, 'all', 'name', 'ASC', 10, false, 1);
+        $second = $service->searchZones($parameters, 'all', 'name', 'ASC', 10, false, 1);
+
+        $this->assertSame($first, $second);
+        $this->assertCount(1, $second);
     }
 
     // ---------------------------------------------------------------

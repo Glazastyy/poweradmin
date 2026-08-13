@@ -806,6 +806,10 @@ generate_config() {
     show_record_delete_button=$(to_php_bool "${PA_SHOW_RECORD_DELETE_BUTTON:-false}")
     local show_forward_zone_associations
     show_forward_zone_associations=$(to_php_bool "${PA_SHOW_FORWARD_ZONE_ASSOCIATIONS:-true}")
+    local ui_cache_enabled
+    ui_cache_enabled=$(to_php_bool "${PA_UI_CACHE_ENABLED:-true}")
+    local ui_cache_dir_esc
+    ui_cache_dir_esc=$(php_sq_escape "${PA_UI_CACHE_DIR:-/tmp/poweradmin-ui-cache}")
 
     # Convert mail boolean values to lowercase
     local mail_auth
@@ -1155,6 +1159,9 @@ return [
         'theme' => '${PA_THEME:-default}',
         'style' => '${PA_STYLE:-light}',
         'theme_base_path' => '${PA_THEME_BASE_PATH:-templates}',
+        'cache_enabled' => ${ui_cache_enabled},
+        'cache_ttl' => ${PA_UI_CACHE_TTL:-60},
+        'cache_dir' => '${ui_cache_dir_esc}',
         'favicon_path' => '${favicon_path_esc}',
         'logo_path' => '${logo_path_esc}',
         'base_url_prefix' => '${PA_BASE_URL_PREFIX:-}',
