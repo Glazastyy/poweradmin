@@ -79,6 +79,15 @@ class UserPreferenceService
             throw new InvalidArgumentException("Invalid timezone: {$value}");
         }
 
+        if (
+            $key === UserPreference::KEY_THEME
+            && $value !== null
+            && $value !== ''
+            && !$this->isValidTheme($value)
+        ) {
+            throw new InvalidArgumentException("Invalid theme: {$value}");
+        }
+
         $this->repository->createOrUpdate($userId, $key, $value);
 
         $cacheKey = $userId . '_' . $key;
@@ -182,6 +191,46 @@ class UserPreferenceService
         return $this->getPreference($userId, UserPreference::KEY_DISPLAY_HOSTNAME_ONLY) === 'true';
     }
 
+    public function getTheme(int $userId): string
+    {
+        $theme = $this->getPreference($userId, UserPreference::KEY_THEME);
+        return is_string($theme) && $this->isValidTheme($theme)
+            ? $theme
+            : (string)$this->config->get('interface', 'theme', 'default');
+    }
+
+    public function isValidTheme(string $theme): bool
+    {
+        if ($theme === '' || str_contains($theme, '/') || str_contains($theme, '\\')) {
+            return false;
+        }
+
+        $themeBasePath = (string)$this->config->get('interface', 'theme_base_path', 'templates');
+        $themePath = $themeBasePath . '/' . $theme;
+
+        return is_dir($themePath) && is_file($themePath . '/header.html') && is_dir($themePath . '/style');
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    public function getAvailableThemes(): array
+    {
+        $themeBasePath = (string)$this->config->get('interface', 'theme_base_path', 'templates');
+        $themes = [];
+
+        foreach (glob($themeBasePath . '/*', GLOB_ONLYDIR) ?: [] as $path) {
+            $theme = basename($path);
+            if ($this->isValidTheme($theme)) {
+                $themes[$theme] = ucfirst(str_replace(['_', '-'], ' ', $theme));
+            }
+        }
+
+        ksort($themes);
+
+        return $themes;
+    }
+
     public function clearCache(): void
     {
         $this->cache = [];
@@ -203,6 +252,7 @@ class UserPreferenceService
             UserPreference::KEY_SHOW_RECORD_EDIT_BUTTON => $this->config->get('interface', 'show_record_edit_button', false) ? 'true' : 'false',
             UserPreference::KEY_SHOW_RECORD_DELETE_BUTTON => $this->config->get('interface', 'show_record_delete_button', false) ? 'true' : 'false',
             UserPreference::KEY_DISPLAY_HOSTNAME_ONLY => $this->config->get('interface', 'display_hostname_only', false) ? 'true' : 'false',
+            UserPreference::KEY_THEME => (string)$this->config->get('interface', 'theme', 'default'),
         ];
     }
 

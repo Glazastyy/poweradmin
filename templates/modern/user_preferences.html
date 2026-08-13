@@ -26,6 +26,15 @@
                             {% endfor %}
                         </select>
                     </div>
+                    <div class="col-sm-6">
+                        <label for="theme" class="form-label small">{% trans %}Theme{% endtrans %}</label>
+                        <select class="form-select form-select-sm" id="theme" name="theme">
+                            {% for value, label in available_themes %}
+                            <option value="{{ value }}" {% if preferences.theme == value %}selected{% endif %}>{{ label }}</option>
+                            {% endfor %}
+                        </select>
+                        <div class="form-text small">{% trans %}Applied only to your account{% endtrans %}</div>
+                    </div>
                 </div>
             </div>
         </div>

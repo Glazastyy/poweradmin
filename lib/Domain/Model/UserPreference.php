@@ -43,6 +43,7 @@ class UserPreference
     public const KEY_SHOW_RECORD_DELETE_BUTTON = 'show_record_delete_button';
     public const KEY_DISPLAY_HOSTNAME_ONLY = 'display_hostname_only';
     public const KEY_TIMEZONE = 'timezone';
+    public const KEY_THEME = 'theme';
 
     /**
      * Valid preference keys
@@ -62,6 +63,7 @@ class UserPreference
         self::KEY_SHOW_RECORD_DELETE_BUTTON,
         self::KEY_DISPLAY_HOSTNAME_ONLY,
         self::KEY_TIMEZONE,
+        self::KEY_THEME,
     ];
 
     public function __construct(

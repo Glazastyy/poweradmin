@@ -79,6 +79,7 @@ abstract class BaseController
     private UserContextService $userContextService;
     private string $pageTitle = '';
     protected LoggerInterface $logger;
+    private string $selectedTheme;
 
     /**
      * Abstract method to be implemented by subclasses to run the controller logic.
@@ -101,18 +102,19 @@ abstract class BaseController
         $logLevel = $this->config->get('logging', 'level', 'info');
         $this->logger = new Logger($logHandler, $logLevel);
 
-        $this->config->setLogger($this->logger);
-        $this->app = new AppManager($this->logger);
-
         $this->init = new AppInitializer($authenticate);
         $this->db = $this->init->getDb();
+        $this->userContextService = new UserContextService();
+        $this->selectedTheme = $this->resolveTheme();
+
+        $this->config->setLogger($this->logger);
+        $this->app = new AppManager($this->logger, $this->selectedTheme);
 
         $this->requestData = $request;
         $this->validator = Validation::createValidator();
 
         $this->csrfTokenService = new CsrfTokenService();
         $this->messageService = new MessageService();
-        $this->userContextService = new UserContextService();
 
         // If we're in an API context and the user is not authenticated,
         // check for API key authentication (but only for internal API routes)
@@ -495,6 +497,30 @@ abstract class BaseController
         return new UserPreferenceService($repository, $this->config);
     }
 
+    private function resolveTheme(): string
+    {
+        $theme = (string)$this->config->get('interface', 'theme', 'default');
+
+        if (!$this->userContextService->isAuthenticated()) {
+            return $theme;
+        }
+
+        $userId = $this->userContextService->getLoggedInUserId();
+        if ($userId === null) {
+            return $theme;
+        }
+
+        try {
+            return $this->createUserPreferenceService()->getTheme($userId);
+        } catch (\Throwable $e) {
+            $this->logger->warning('Failed to resolve user theme preference: {message}', [
+                'message' => $e->getMessage(),
+            ]);
+
+            return $theme;
+        }
+    }
+
     protected function createUserTimezoneService(): UserTimezoneService
     {
         return new UserTimezoneService($this->createUserPreferenceService(), $this->config);
@@ -691,7 +717,7 @@ abstract class BaseController
 
         $style = $this->config->get('interface', 'style', 'light');
         $themeBasePath = $this->config->get('interface', 'theme_base_path', 'templates');
-        $theme = $this->config->get('interface', 'theme', 'default');
+        $theme = $this->selectedTheme;
         $styleManager = new StyleManager($style, $themeBasePath, $theme);
 
         // Check for custom theme stylesheets
@@ -710,7 +736,7 @@ abstract class BaseController
             'theme_base_path' => $themeBasePath,
             'base_url_prefix' => $baseUrlPrefix,
             'file_version' => time(),
-            'custom_header' => file_exists($this->config->get('interface', 'theme_base_path', 'templates') . '/' . $this->config->get('interface', 'theme', 'default') . '/custom/header.html'),
+            'custom_header' => file_exists($themeBasePath . '/' . $theme . '/custom/header.html'),
             'custom_light_exists' => $customLightExists,
             'custom_dark_exists' => $customDarkExists,
             'custom_theme_exists' => $customThemeExists,
@@ -815,7 +841,7 @@ abstract class BaseController
     {
         $style = $this->config->get('interface', 'style', 'light');
         $themeBasePath = $this->config->get('interface', 'theme_base_path', 'templates');
-        $theme = $this->config->get('interface', 'theme', 'default');
+        $theme = $this->selectedTheme;
         $styleManager = new StyleManager($style, $themeBasePath, $theme);
         $selected_style = $styleManager->getSelectedStyle();
 
@@ -824,7 +850,7 @@ abstract class BaseController
 
         $this->app->render('footer.html', [
             'version' => $this->userContextService->isAuthenticated() ? Version::VERSION : false,
-            'custom_footer' => file_exists($this->config->get('interface', 'theme_base_path', 'templates') . '/' . $this->config->get('interface', 'theme', 'default') . '/custom/footer.html'),
+            'custom_footer' => file_exists($themeBasePath . '/' . $theme . '/custom/footer.html'),
             'display_stats' => $display_stats ? $this->app->displayStats() : false,
             'db_queries' => $db_debug ? $this->init->getDebugQueries() : false,
             'show_style_switcher' => in_array($selected_style, ['light', 'dark']),

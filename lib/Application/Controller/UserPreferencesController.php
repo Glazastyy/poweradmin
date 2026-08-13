@@ -63,11 +63,13 @@ class UserPreferencesController extends BaseController
         $availableRowsPerPageOptions = $this->getAvailableRowsPerPageOptions();
         $availablePositions = $this->getAvailablePositions();
         $timezoneOptions = $this->getTimezoneOptions();
+        $availableThemes = $userPreferenceService->getAvailableThemes();
 
         // Prepare template variables
         $templateVars = [
             'preferences' => $preferences,
             'available_rows_per_page' => $availableRowsPerPageOptions,
+            'available_themes' => $availableThemes,
             'available_positions' => $availablePositions,
             'timezone_regions' => $timezoneOptions['regions'],
             'timezone_cities' => $timezoneOptions['cities'],
@@ -97,6 +99,7 @@ class UserPreferencesController extends BaseController
                 UserPreference::KEY_SHOW_RECORD_EDIT_BUTTON => isset($_POST['show_record_edit_button']) ? 'true' : 'false',
                 UserPreference::KEY_SHOW_RECORD_DELETE_BUTTON => isset($_POST['show_record_delete_button']) ? 'true' : 'false',
                 UserPreference::KEY_DISPLAY_HOSTNAME_ONLY => isset($_POST['display_hostname_only']) ? 'true' : 'false',
+                UserPreference::KEY_THEME => $_POST['theme'] ?? null,
             ];
 
             // The record-ID toggle is hidden in API mode, so its checkbox is never

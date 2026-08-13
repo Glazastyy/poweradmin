@@ -64,14 +64,14 @@ class AppManager
      * AppManager constructor.
      * Initializes the template renderer, configuration, and optional statistics display service.
      */
-    public function __construct(?LoggerInterface $logger = null)
+    public function __construct(?LoggerInterface $logger = null, ?string $themeOverride = null)
     {
         $this->logger = $logger ?? new NullLogger();
         $this->configuration = ConfigurationManager::getInstance();
         $this->configuration->initialize();
 
         $theme_base_path = $this->configuration->get('interface', 'theme_base_path', 'templates');
-        $theme = $this->configuration->get('interface', 'theme', 'default');
+        $theme = $themeOverride ?: $this->configuration->get('interface', 'theme', 'default');
         $theme_path = $theme_base_path . '/' . $theme;
 
         // Validate theme directory exists, fallback to 'default' if not
