@@ -45,8 +45,8 @@
 <!-- Regular header with navigation -->
 <header class="mb-4">
     <div class="container">
-        <div class="d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
-            <a class="py-4 d-flex align-items-center my-2 my-lg-0 me-lg-auto text-decoration-none"
+        <div class="app-header-row d-flex flex-wrap align-items-center justify-content-center justify-content-lg-start">
+            <a class="app-brand py-4 d-flex align-items-center my-2 my-lg-0 me-lg-auto text-decoration-none"
                href="{{ base_url_prefix }}/">
                 {% if custom_header %}
                 {% include ('custom/header.html') %}
@@ -57,7 +57,7 @@
             </a>
 
             {% if not user_logged_in and current_page == 'login' and show_language_selector is defined and show_language_selector and locales is defined %}
-            <div class="dropdown">
+            <div class="dropdown app-language-switcher">
                 <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" id="langSwitcher" data-bs-toggle="dropdown" aria-expanded="false">
                     <i class="bi bi-globe me-1"></i><span id="currentLangLabel">{% for loc in locales %}{% if loc.selected %}{{ loc.language }}{% endif %}{% endfor %}</span>
                 </button>
@@ -86,7 +86,14 @@
             </script>
             {% endif %}
 
-            <ul class="nav col-12 col-lg-auto my-2 justify-content-center my-md-0 text-small">
+            {% if user_logged_in %}
+            <button class="navbar-toggler app-nav-toggle d-lg-none ms-auto" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavMenu" aria-controls="mainNavMenu" aria-expanded="false" aria-label="{% trans %}Toggle navigation{% endtrans %}">
+                <i class="bi bi-list"></i>
+            </button>
+            {% endif %}
+
+            <div class="app-nav-collapse collapse d-lg-block col-12 col-lg-auto" id="mainNavMenu">
+            <ul class="nav my-2 justify-content-center my-md-0 text-small">
                 {% if user_logged_in %}
                 {% if perm_search %}
                 <li class="p-2">
@@ -284,6 +291,7 @@
                 </li>
                 {% endif %}
             </ul>
+            </div>
         </div>
     </div>
 </header>
