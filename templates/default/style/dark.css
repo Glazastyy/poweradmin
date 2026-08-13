@@ -20,6 +20,142 @@ body {
     background-color: var(--bg-dark);
 }
 
+@media (max-width: 575.98px) {
+    header.mb-4 {
+        margin-bottom: 0.75rem !important;
+    }
+
+    header .container {
+        max-width: 100%;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    header .container > .d-flex {
+        justify-content: flex-start !important;
+    }
+
+    header a.py-4 {
+        padding-top: 0.85rem !important;
+        padding-bottom: 0.6rem !important;
+        margin: 0 !important;
+    }
+
+    header a.py-4 img {
+        height: 24px;
+    }
+
+    header a.py-4 .fs-4 {
+        font-size: 1.05rem !important;
+    }
+
+    header .nav {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-start !important;
+        gap: 0.25rem;
+        width: 100%;
+        margin: 0 !important;
+        padding: 0.25rem 0 0.6rem;
+        overflow-x: auto;
+        overflow-y: hidden;
+        scrollbar-width: none;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    header .nav::-webkit-scrollbar {
+        display: none;
+    }
+
+    header .nav > li {
+        flex: 0 0 4.75rem;
+        padding: 0.25rem !important;
+        text-align: center;
+    }
+
+    header .nav .nav-link {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 2rem;
+        padding: 0.25rem 0;
+    }
+
+    header .nav .nav-link + a {
+        display: block;
+        max-width: 100%;
+        overflow: hidden;
+        font-size: 0.75rem;
+        line-height: 1.1;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    main.container {
+        max-width: 100%;
+        padding-left: 0.75rem;
+        padding-right: 0.75rem;
+    }
+
+    .dashboard-summary {
+        align-items: flex-start !important;
+        flex-direction: column;
+        gap: 0.45rem;
+        margin-bottom: 0.65rem !important;
+    }
+
+    .dashboard-summary h5 {
+        font-size: 1rem;
+        line-height: 1.15;
+    }
+
+    .dashboard-summary > .d-flex {
+        display: grid !important;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 0.25rem 0.75rem !important;
+        width: 100%;
+    }
+
+    .dashboard-summary .small {
+        min-width: 0;
+        line-height: 1.15;
+    }
+
+    .card .card-header {
+        padding: 0.4rem 0.6rem !important;
+    }
+
+    .card .card-body {
+        padding: 0.5rem !important;
+    }
+
+    .card-item {
+        flex: 0 0 auto;
+        width: 50% !important;
+    }
+
+    .card-item > .card {
+        min-height: 5.75rem;
+        border-radius: 0.35rem;
+    }
+
+    .card-item .card-body {
+        display: flex;
+        min-height: 5.75rem;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .card-item .fs-2 {
+        font-size: 1.45rem !important;
+    }
+
+    .card-item small {
+        font-size: 0.75rem;
+        white-space: normal;
+    }
+}
+
 /* Add smooth transitions for better UX */
 .btn, .form-control, .form-select, .card, .list-group-item, .nav-link, .dropdown-item, .page-link {
     transition: all 0.15s ease-in-out;
