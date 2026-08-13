@@ -28,6 +28,8 @@ use Poweradmin\Infrastructure\Service\RedirectService;
 
 class AuthenticationService
 {
+    private const POST_LOGIN_REDIRECT = 'post_login_redirect';
+
     private SessionService $sessionService;
     private RedirectService $redirectService;
     private ConfigurationManager $config;
@@ -39,9 +41,12 @@ class AuthenticationService
         $this->config = ConfigurationManager::getInstance();
     }
 
-    public function logout(SessionEntity $sessionEntity): void
+    public function logout(SessionEntity $sessionEntity, ?string $postLoginRedirect = null): void
     {
         $this->sessionService->endSession();
+        if ($postLoginRedirect !== null) {
+            $_SESSION[self::POST_LOGIN_REDIRECT] = $postLoginRedirect;
+        }
         $this->sessionService->setSessionData($sessionEntity);
         $this->redirectToLogin();
     }
@@ -61,6 +66,61 @@ class AuthenticationService
     public function redirectToIndex(): void
     {
         $baseUrlPrefix = $this->config->get('interface', 'base_url_prefix', '');
-        $this->redirectService->redirectTo($baseUrlPrefix . '/');
+        $this->redirectService->redirectTo(self::consumePostLoginRedirect($baseUrlPrefix));
+    }
+
+    public static function currentRequestRedirectTarget(string $baseUrlPrefix = ''): ?string
+    {
+        if (($_SERVER['REQUEST_METHOD'] ?? 'GET') !== 'GET') {
+            return null;
+        }
+
+        $requestUri = $_SERVER['REQUEST_URI'] ?? '';
+        return self::normalizeRedirectTarget($requestUri, $baseUrlPrefix);
+    }
+
+    public static function consumePostLoginRedirect(string $baseUrlPrefix = ''): string
+    {
+        $target = $_SESSION[self::POST_LOGIN_REDIRECT] ?? null;
+        unset($_SESSION[self::POST_LOGIN_REDIRECT]);
+
+        if (!is_string($target)) {
+            return $baseUrlPrefix . '/';
+        }
+
+        return self::normalizeRedirectTarget($target, '') ?? ($baseUrlPrefix . '/');
+    }
+
+    private static function normalizeRedirectTarget(string $target, string $baseUrlPrefix): ?string
+    {
+        if ($target === '' || str_contains($target, "\r") || str_contains($target, "\n") || str_starts_with($target, '//')) {
+            return null;
+        }
+
+        $parts = parse_url($target);
+        if ($parts === false || isset($parts['scheme']) || isset($parts['host'])) {
+            return null;
+        }
+
+        $path = $parts['path'] ?? '/';
+        if (!str_starts_with($path, '/')) {
+            return null;
+        }
+
+        if ($baseUrlPrefix !== '' && str_starts_with($path, $baseUrlPrefix . '/')) {
+            $path = substr($path, strlen($baseUrlPrefix));
+        }
+
+        if (
+            $path === '/login' ||
+            $path === '/logout' ||
+            str_starts_with($path, '/api/') ||
+            str_starts_with($path, '/mfa/')
+        ) {
+            return null;
+        }
+
+        $query = isset($parts['query']) && $parts['query'] !== '' ? '?' . $parts['query'] : '';
+        return $baseUrlPrefix . $path . $query;
     }
 }

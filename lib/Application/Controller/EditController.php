@@ -44,6 +44,7 @@ use Poweradmin\Application\Service\RecordCommentSyncService;
 use Poweradmin\Application\Service\RecordManagerService;
 use Poweradmin\BaseController;
 use Poweradmin\Domain\Model\RecordLog;
+use Poweradmin\Domain\Model\RecordType;
 use Poweradmin\Domain\Service\RecordTypeService;
 use Poweradmin\Domain\Model\UserManager;
 use Poweradmin\Domain\Model\ZoneTemplate;
@@ -498,6 +499,7 @@ class EditController extends BaseController
             'record_types' => $isReverseZone
                 ? $this->recordTypeService->getReverseZoneTypes($isDnsSecEnabled, $this->getRecordTypeCapabilities())
                 : $this->recordTypeService->getDomainZoneTypes($isDnsSecEnabled, $this->getRecordTypeCapabilities()),
+            'deprecated_types' => RecordType::DEPRECATED_TYPES,
             'iface_add_reverse_record' => $this->config->get('interface', 'add_reverse_record', true),
             'iface_add_domain_record' => $this->config->get('interface', 'add_domain_record', true),
             'iface_edit_show_id' => $iface_show_id,

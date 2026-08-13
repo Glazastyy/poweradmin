@@ -19,6 +19,12 @@
     </ol>
 </nav>
 
+<datalist id="dns-record-type-options">
+    {% for record_type in record_types %}
+    <option value="{{ record_type }}"{% if record_type in deprecated_types %} label="{{ record_type }} ({% trans %}deprecated{% endtrans %})"{% endif %}></option>
+    {% endfor %}
+</datalist>
+
 {% if (perm_edit == "all" or (perm_edit == "own" or perm_edit == "own_as_client") and user_is_zone_owner == "1") and domain_type != "SLAVE" and iface_edit_add_record_top and iface_show_add_record_form %}
 <div class="card shadow-sm mb-4">
     <div class="card-header py-3 d-flex justify-content-between align-items-center">
@@ -94,21 +100,15 @@
                         {% endif %}
                     </td>
                     <td class="col-sm-2">
-                        <select id="recordTypeSelectTop" class="form-select form-select-sm" name="type" onchange="updateContentInput('recordTypeSelectTop', 'contentInputContainerTop', 'recordContentTop'); updatePriorityFieldState(this, 'priorityFieldTop'); updateTtlForType(this, this.closest('form').querySelector('input[name=ttl]'));" {% if form_data.type %}data-preselect="{{ form_data.type }}"{% endif %}>
-                            {% set rev = false %}
-                            {% for record_type in record_types %}
-                            {% set add = "" %}
-                            {% if is_reverse_zone and record_type == "PTR" %}
-                            {% set add = "SELECTED" %}
+                        {% set selected_type = form_data.type|default('') %}
+                        {% if not selected_type %}
+                            {% if is_reverse_zone %}
+                                {% set selected_type = 'PTR' %}
+                            {% elseif iface_add_reverse_record %}
+                                {% set selected_type = 'A' %}
                             {% endif %}
-
-                            {% if iface_add_reverse_record and record_type == "A" %}
-                            {% set add = "SELECTED" %}
-                            {% set rev = true %}
-                            {% endif %}
-                            <option {{ add }} value="{{ record_type }}">{{ record_type }}</option>
-                            {% endfor %}
-                        </select>
+                        {% endif %}
+                        <input id="recordTypeSelectTop" class="form-control form-control-sm record-type-input" list="dns-record-type-options" name="type" value="{{ selected_type }}" autocomplete="off" oninput="this.value = this.value.toUpperCase(); updateContentInput('recordTypeSelectTop', 'contentInputContainerTop', 'recordContentTop'); updatePriorityFieldState(this, 'priorityFieldTop'); updateTtlForType(this, this.closest('form').querySelector('input[name=ttl]'));">
                     </td>
                     <td>
                         <div id="contentInputContainerTop">
@@ -411,7 +411,7 @@
                     </thead>
                     <tbody>
         {% for r in records %}
-        {% set record_locked = (r['type'] == "SOA" and perm_edit != "all") or (r['type'] == "NS" and perm_edit == "own_as_client") %}
+        {% set record_locked = r['type'] == "SOA" or (r['type'] == "NS" and perm_edit == "own_as_client") %}
 
         {% if not record_locked %}
         <input type="hidden" name="record[{{ r['id'] }}][rid]" value="{{ r['id'] }}">
@@ -449,8 +449,11 @@
             <td class="col-sm-2"><input class="form-control form-control-sm" type="text"
                                         name="record[{{ r['id'] }}][name]" value="{{ r['editable_name'] is defined ? r['editable_name'] : r['name'] }}"></td>
             <td class="text-center">
-                <input type="hidden" name="record[{{ r['id'] }}][type]" value="{{ r['type'] }}">
-                <span class="badge {{ record_type_class(r['type']) }}">{{ r['type'] }}</span>
+                <input id="recordTypeInline{{ r['id'] }}" class="form-control form-control-sm record-type-input" list="dns-record-type-options" type="text"
+                       name="record[{{ r['id'] }}][type]" value="{{ r['type'] }}"
+                       autocomplete="off"
+                       oninput="this.value = this.value.toUpperCase(); updateContentInput('recordTypeInline{{ r['id'] }}', 'contentInputContainer{{ r['id'] }}', 'recordContent{{ r['id'] }}'); updatePriorityFieldState(this, 'priority_field_{{ r['id'] }}');"
+                       aria-label="{% trans %}Type{% endtrans %}">
             </td>
             <td>
                 <div id="contentInputContainer{{ r['id'] }}">
@@ -487,7 +490,7 @@
             {% if iface_show_record_edit_button or iface_show_record_delete_button %}
                 {% if domain_type == "SLAVE" or perm_edit == "none" or (perm_edit == "own" or perm_edit == "own_as_client") and user_is_zone_owner == "0" %}
                 <td>&nbsp;</td>
-                {% elseif r['type'] == "SOA" and perm_edit != "all" or r['type'] == "NS" and perm_edit == "own_as_client" %}
+                {% elseif r['type'] == "SOA" or r['type'] == "NS" and perm_edit == "own_as_client" %}
                 <td>&nbsp;</td>
                 {% else %}
                 <td class="text-center" style="width: 100px;">
@@ -680,21 +683,15 @@
                         {% endif %}
                     </td>
                     <td class="col-sm-2">
-                        <select id="recordTypeSelectBottom" class="form-select form-select-sm" name="type" onchange="updateContentInput('recordTypeSelectBottom', 'contentInputContainerBottom', 'recordContentBottom'); updatePriorityFieldState(this, 'priorityFieldBottom'); updateTtlForType(this, this.closest('form').querySelector('input[name=ttl]'));" {% if form_data.type %}data-preselect="{{ form_data.type }}"{% endif %}>
-                            {% set rev = false %}
-                            {% for record_type in record_types %}
-                            {% set add = "" %}
-                            {% if is_reverse_zone and record_type == "PTR" %}
-                            {% set add = "SELECTED" %}
+                        {% set selected_type = form_data.type|default('') %}
+                        {% if not selected_type %}
+                            {% if is_reverse_zone %}
+                                {% set selected_type = 'PTR' %}
+                            {% elseif iface_add_reverse_record %}
+                                {% set selected_type = 'A' %}
                             {% endif %}
-
-                            {% if iface_add_reverse_record and record_type == "A" %}
-                            {% set add = "SELECTED" %}
-                            {% set rev = true %}
-                            {% endif %}
-                            <option {{ add }} value="{{ record_type }}">{{ record_type }}</option>
-                            {% endfor %}
-                        </select>
+                        {% endif %}
+                        <input id="recordTypeSelectBottom" class="form-control form-control-sm record-type-input" list="dns-record-type-options" name="type" value="{{ selected_type }}" autocomplete="off" oninput="this.value = this.value.toUpperCase(); updateContentInput('recordTypeSelectBottom', 'contentInputContainerBottom', 'recordContentBottom'); updatePriorityFieldState(this, 'priorityFieldBottom'); updateTtlForType(this, this.closest('form').querySelector('input[name=ttl]'));">
                     </td>
                     <td>
                         <div id="contentInputContainerBottom">
@@ -954,6 +951,9 @@
             typeSelect.addEventListener('change', function() {
                 checkCnameRootWarning(selectId, nameInputSelector, warningId);
             });
+            typeSelect.addEventListener('input', function() {
+                checkCnameRootWarning(selectId, nameInputSelector, warningId);
+            });
         }
         
         if (nameField) {
@@ -999,6 +999,13 @@
             const typeSelect = document.getElementById(selectId);
             if (typeSelect && typeSelect.hasAttribute('data-preselect')) {
                 const preselectedType = typeSelect.getAttribute('data-preselect');
+                if (!typeSelect.options) {
+                    typeSelect.value = preselectedType;
+                    suppressTtlSwap = true;
+                    typeSelect.dispatchEvent(new Event('input', { bubbles: true }));
+                    suppressTtlSwap = false;
+                    return;
+                }
                 for (let i = 0; i < typeSelect.options.length; i++) {
                     if (typeSelect.options[i].value === preselectedType) {
                         typeSelect.selectedIndex = i;

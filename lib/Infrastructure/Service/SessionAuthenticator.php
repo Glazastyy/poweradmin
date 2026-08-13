@@ -185,15 +185,20 @@ class SessionAuthenticator extends LoggingService
 
         // Check if the session hasn't expired yet.
         if (isset($_SESSION["userid"]) && isset($_SESSION["lastmod"]) && $_SESSION["lastmod"] !== "" && ((time() - $_SESSION["lastmod"]) > $iface_expire)) {
-            $this->logInfo('Session expired for user {userid}', ['userid' => $_SESSION["userid"]]);
+            $expiredUserId = $_SESSION["userid"];
+            $this->logInfo('Session expired for user {userid}', ['userid' => $expiredUserId]);
 
             $auditService = new AuditService($this->db);
             $auditService->logSessionExpired();
 
             $sessionEntity = new SessionEntity(_('Session expired, please login again.'), 'danger');
-            $this->authService->logout($sessionEntity);
+            $baseUrlPrefix = $this->configManager->get('interface', 'base_url_prefix', '');
+            $this->authService->logout(
+                $sessionEntity,
+                AuthenticationService::currentRequestRedirectTarget($baseUrlPrefix)
+            );
 
-            $this->logDebug('Session expired and user {userid} logged out', ['userid' => $_SESSION["userid"]]);
+            $this->logDebug('Session expired and user {userid} logged out', ['userid' => $expiredUserId]);
             return;
         }
 

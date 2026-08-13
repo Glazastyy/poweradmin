@@ -26,6 +26,7 @@ use Exception;
 use Poweradmin\Application\Service\CsrfTokenService;
 use Poweradmin\Application\Service\MailService;
 use Poweradmin\BaseController;
+use Poweradmin\Domain\Service\AuthenticationService;
 use Poweradmin\Domain\Service\MfaService;
 use Poweradmin\Domain\Service\MfaSessionManager;
 use Poweradmin\Domain\Service\UserContextService;
@@ -252,26 +253,28 @@ class MfaVerifyController extends BaseController
                 $this->userContextService->setSessionData('ldap_auth_username', $username);
             }
 
-            // Ensure session is written before redirecting
-            session_write_close();
-
             // Clear output buffer if any exists
             if (ob_get_level()) {
                 ob_end_clean();
             }
 
+            $baseUrlPrefix = $this->config->get('interface', 'base_url_prefix', '');
+            $redirectUrl = AuthenticationService::consumePostLoginRedirect($baseUrlPrefix);
+
+            // Ensure session is written before redirecting
+            session_write_close();
+
             // Handle AJAX requests
             if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) && strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest') {
                 header('Content-Type: application/json');
-                echo json_encode(['success' => true, 'redirect' => 'index.php']);
+                echo json_encode(['success' => true, 'redirect' => $redirectUrl]);
                 exit;
             }
 
             // Send redirect with proper cache headers
             header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
             header('Pragma: no-cache');
-            $baseUrlPrefix = $this->config->get('interface', 'base_url_prefix', '');
-            header("Location: " . $baseUrlPrefix . "/", true, 302);
+            header("Location: " . $redirectUrl, true, 302);
             exit;
         } else {
             // MFA verification failed

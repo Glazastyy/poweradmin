@@ -22,6 +22,7 @@
 
 namespace Poweradmin\Domain\Service;
 
+use Poweradmin\Domain\Model\RecordType;
 use Poweradmin\Infrastructure\Configuration\ConfigurationInterface;
 
 class DnsFormatter
@@ -35,15 +36,16 @@ class DnsFormatter
 
     public function formatContent(string $type, string $content): string
     {
-        return match ($type) {
-            'TXT' => $this->formatTxtContent($content),
+        return match (strtoupper($type)) {
+            RecordType::TXT => $this->formatQuotedContent($content, true),
+            RecordType::REGEX => $this->formatQuotedContent($content, false),
             default => $content,
         };
     }
 
-    private function formatTxtContent(string $content): string
+    private function formatQuotedContent(string $content, bool $respectTxtAutoQuote): string
     {
-        if (!$this->config->get('dns', 'txt_auto_quote')) {
+        if ($respectTxtAutoQuote && !$this->config->get('dns', 'txt_auto_quote')) {
             return $content;
         }
 

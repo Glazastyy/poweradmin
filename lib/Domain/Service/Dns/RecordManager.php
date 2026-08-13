@@ -326,10 +326,10 @@ class RecordManager implements RecordManagerInterface
         $zone_type = $this->domainRepository->getDomainType($record['zid']);
 
         // The stored type counts as well: posting a different type would otherwise
-        // let a client-level editor rewrite an existing SOA or NS record.
+        // let an editor rewrite a protected record by changing its type first.
         $affectedTypes = [strtoupper((string)$recordDetails['type']), strtoupper((string)$record['type'])];
-        if ($perm_edit == "own_as_client" && in_array('SOA', $affectedTypes, true)) {
-            $this->messageService->addSystemError(_("You do not have the permission to edit this SOA record."));
+        if (in_array('SOA', $affectedTypes, true)) {
+            $this->messageService->addSystemError(_("SOA records cannot be edited from the records list."));
 
             return false;
         }

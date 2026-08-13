@@ -72,6 +72,7 @@ class RecordType
     public const PTR = 'PTR';
     public const RKEY = 'RKEY';
     public const RP = 'RP';
+    public const REGEX = 'REGEX';
     public const RRSIG = 'RRSIG';
     public const SMIMEA = 'SMIMEA';
     public const SOA = 'SOA';
@@ -161,6 +162,7 @@ class RecordType
         self::NID,
         self::OPENPGPKEY,
         self::RKEY,
+        self::REGEX,
         self::RP,
         self::SMIMEA,
         self::SPF,
